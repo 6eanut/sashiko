@@ -879,6 +879,25 @@
           "wake_up_"
         ]
       }
+    },
+    {
+      "file": "syscall.md",
+      "defining_files": [
+        "include/linux/syscalls.h",
+        "include/linux/uaccess.h"
+      ],
+      "symbols": {
+        "exact": [
+          "copy_from_user",
+          "copy_to_user",
+          "copy_struct_from_user",
+          "get_user",
+          "put_user"
+        ],
+        "prefixes": [
+          "SYSCALL_DEFINE"
+        ]
+      }
     }
   ]
 }

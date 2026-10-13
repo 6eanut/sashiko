@@ -88,3 +88,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Power Management & Runtime PM API | `pm_runtime_*`, `__pm_runtime_*`, `rpm_idle`, `rpm_suspend`, `rpm_resume`, `pm_hibernate_is_recovering`, `pm_hibernation_mode_is_suspend`, `pm_sleep_ptr`, `pm_ptr` | `apis/pm.md` |
 | Read-Copy-Update (RCU) API | `rcu_read_lock`, `rcu_assign_pointer`, `rcu_dereference`, `call_rcu`, `synchronize_rcu`, `kfree_rcu`, `kvfree_call_rcu`, `list_del_rcu`, `hlist_del_rcu` | `apis/rcu.md` |
 | Task State, Wakeup & Migration API | `set_current_state`, `schedule`, `wake_up_process`, `try_to_wake_up`, `migrate_disable`, `set_cpus_allowed_ptr`, `kthread_bind` | `apis/scheduler.md` |
+| Syscall Parameter Validation & User Copy API | `SYSCALL_DEFINE*`, `copy_from_user`, `copy_to_user`, `copy_struct_from_user`, `get_user`, `put_user` | `apis/syscall.md` |
