@@ -122,6 +122,15 @@ fn glob_to_regex(glob: &str) -> String {
     re
 }
 
+/// Formal role of an entry in a MAINTAINERS section (`M:` vs `R:`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum MaintainerRole {
+    /// Listed on an `M:` (Maintainer) line.
+    Maintainer,
+    /// Listed on an `R:` (Designated Reviewer) line.
+    Reviewer,
+}
+
 /// A parsed section from the Linux kernel MAINTAINERS file.
 #[derive(Debug, Clone)]
 pub struct MaintainerSection {
@@ -137,6 +146,8 @@ pub struct MaintainerSection {
     pub mailing_lists: Vec<String>,
     /// `M:` / `R:` maintainers and reviewers.
     pub maintainers: Vec<String>,
+    /// `M:` and `R:` entries paired with their formal role.
+    pub role_entries: Vec<(String, MaintainerRole)>,
     /// `T:` SCM source trees.
     pub trees: Vec<(String, Option<String>)>,
     /// Whether a file pattern claims the whole tree, which in the current file
@@ -189,6 +200,22 @@ impl MaintainerSection {
         self.maintainers
             .iter()
             .filter_map(|m| maintainer_address(m))
+    }
+
+    /// Returns the formal role (`Maintainer` vs `Reviewer`) for `address` in this section.
+    /// If the address is listed on both `M:` and `R:`, `Maintainer` takes precedence.
+    pub fn role_for_address(&self, address: &str) -> Option<MaintainerRole> {
+        let target = address.trim().to_ascii_lowercase();
+        let mut best: Option<MaintainerRole> = None;
+        for (entry, role) in &self.role_entries {
+            if maintainer_address(entry).as_deref() == Some(target.as_str()) {
+                match role {
+                    MaintainerRole::Maintainer => return Some(MaintainerRole::Maintainer),
+                    MaintainerRole::Reviewer => best = Some(MaintainerRole::Reviewer),
+                }
+            }
+        }
+        best
     }
 
     /// Checks if a file path matches this section.
@@ -286,6 +313,24 @@ impl MaintainersIndex {
             .contains(&address.trim().to_ascii_lowercase())
     }
 
+    /// Returns the formal role (`Maintainer` vs `Reviewer`) of `address` in `section_name`.
+    ///
+    /// When `MAINTAINERS` contains duplicate section headers with the same title,
+    /// inspects all matching sections and returns the highest authority role
+    /// (`Maintainer` over `Reviewer`).
+    pub fn role_for_address_in_section(
+        &self,
+        address: &str,
+        section_name: &str,
+    ) -> Option<MaintainerRole> {
+        let target = section_name.trim();
+        self.sections
+            .iter()
+            .filter(|s| s.name.eq_ignore_ascii_case(target))
+            .filter_map(|s| s.role_for_address(address))
+            .min()
+    }
+
     /// Loads and parses MAINTAINERS from a file path.
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let path = path.as_ref();
@@ -349,6 +394,7 @@ impl MaintainersIndex {
         let mut current_regexes = Vec::new();
         let mut current_lists = Vec::new();
         let mut current_maintainers = Vec::new();
+        let mut current_role_entries = Vec::new();
         let mut current_trees = Vec::new();
         let mut current_catch_all = false;
 
@@ -379,9 +425,19 @@ impl MaintainersIndex {
                         regexes: std::mem::take(&mut current_regexes),
                         mailing_lists: std::mem::take(&mut current_lists),
                         maintainers: std::mem::take(&mut current_maintainers),
+                        role_entries: std::mem::take(&mut current_role_entries),
                         trees: std::mem::take(&mut current_trees),
                         catch_all: std::mem::take(&mut current_catch_all),
                     });
+                } else {
+                    current_files.clear();
+                    current_excludes.clear();
+                    current_regexes.clear();
+                    current_lists.clear();
+                    current_maintainers.clear();
+                    current_role_entries.clear();
+                    current_trees.clear();
+                    current_catch_all = false;
                 }
                 current_name.clear();
                 continue;
@@ -425,8 +481,13 @@ impl MaintainersIndex {
                             current_lists.push(email);
                         }
                     }
-                    "M" | "R" => {
+                    "M" => {
                         current_maintainers.push(val.to_string());
+                        current_role_entries.push((val.to_string(), MaintainerRole::Maintainer));
+                    }
+                    "R" => {
+                        current_maintainers.push(val.to_string());
+                        current_role_entries.push((val.to_string(), MaintainerRole::Reviewer));
                     }
                     "T" => {
                         if let Some(rest) = val.strip_prefix("git ") {
@@ -462,6 +523,7 @@ impl MaintainersIndex {
                 regexes: current_regexes,
                 mailing_lists: current_lists,
                 maintainers: current_maintainers,
+                role_entries: current_role_entries,
                 trees: current_trees,
                 catch_all: current_catch_all,
             });
@@ -746,6 +808,27 @@ F:	*/
     }
 
     #[test]
+    fn test_role_for_address_in_section_distinguishes_maintainer_and_reviewer() {
+        let index = MaintainersIndex::from_reader(SAMPLE_MAINTAINERS.as_bytes()).unwrap();
+        assert_eq!(
+            index.role_for_address_in_section("clm@fb.com", "BTRFS FILE SYSTEM"),
+            Some(MaintainerRole::Maintainer)
+        );
+        assert_eq!(
+            index.role_for_address_in_section("clm@fb.com", "MEMORY MANAGEMENT"),
+            Some(MaintainerRole::Reviewer)
+        );
+        assert_eq!(
+            index.role_for_address_in_section("akpm@linux-foundation.org", "MEMORY MANAGEMENT"),
+            Some(MaintainerRole::Maintainer)
+        );
+        assert_eq!(
+            index.role_for_address_in_section("clm@fb.com", "NETWORKING [GENERAL]"),
+            None
+        );
+    }
+
+    #[test]
     fn test_catch_all_section_confers_global_scope() {
         let index = MaintainersIndex::from_reader(SAMPLE_MAINTAINERS.as_bytes()).unwrap();
         assert!(index.is_global_maintainer("torvalds@linux-foundation.org"));
@@ -863,5 +946,62 @@ F:	*/
     fn test_sections_for_diff_without_file_names() {
         assert!(sections_for_diff("").is_empty());
         assert!(sections_for_diff("just a cover letter body\n").is_empty());
+    }
+
+    #[test]
+    fn test_role_for_address_across_duplicate_section_titles() {
+        let input = "\
+Maintainers List
+----------------
+
+DUPLICATE SUBSYSTEM
+M:\tFirst Owner <first@kernel.org>
+R:\tDual Role <dual@kernel.org>
+F:\tdrivers/dup/a.c
+
+DUPLICATE SUBSYSTEM
+M:\tDual Role <dual@kernel.org>
+M:\tSecond Owner <second@kernel.org>
+F:\tdrivers/dup/b.c
+";
+        let index = MaintainersIndex::from_reader(std::io::Cursor::new(input)).unwrap();
+        assert_eq!(
+            index.role_for_address_in_section("second@kernel.org", "DUPLICATE SUBSYSTEM"),
+            Some(MaintainerRole::Maintainer)
+        );
+        assert_eq!(
+            index.role_for_address_in_section("dual@kernel.org", "DUPLICATE SUBSYSTEM"),
+            Some(MaintainerRole::Maintainer)
+        );
+    }
+
+    #[test]
+    fn test_skipped_section_does_not_leak_maintainers_or_roles() {
+        let input = "\
+Maintainers List
+----------------
+
+OBSOLETE ENTRY WITHOUT FILES
+M:\tStale Owner <stale@kernel.org>
+R:\tStale Reviewer <stale-rev@kernel.org>
+S:\tObsolete
+
+ACTIVE SUBSYSTEM
+M:\tActive Owner <active@kernel.org>
+F:\tdrivers/active/
+";
+        let index = MaintainersIndex::from_reader(std::io::Cursor::new(input)).unwrap();
+        assert_eq!(
+            index.role_for_address_in_section("stale@kernel.org", "ACTIVE SUBSYSTEM"),
+            None
+        );
+        assert_eq!(
+            index.role_for_address_in_section("stale-rev@kernel.org", "ACTIVE SUBSYSTEM"),
+            None
+        );
+        assert_eq!(
+            index.role_for_address_in_section("active@kernel.org", "ACTIVE SUBSYSTEM"),
+            Some(MaintainerRole::Maintainer)
+        );
     }
 }
