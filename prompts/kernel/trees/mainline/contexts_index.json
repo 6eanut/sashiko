@@ -434,6 +434,23 @@
         "V4L2_SUBDEV_",
         "MEDIA_BUS_FMT_"
       ]
+    },
+    {
+      "file": "mips.md",
+      "covered_paths": [
+        "arch/mips/"
+      ],
+      "triggers": [
+        "arch/mips/",
+        "tlb_probe",
+        "tlb_read",
+        "tlb_write_indexed",
+        "write_c0_entryhi",
+        "read_c0_index",
+        "TLBP",
+        "TLBR",
+        "TLBWI"
+      ]
     }
   ]
 }

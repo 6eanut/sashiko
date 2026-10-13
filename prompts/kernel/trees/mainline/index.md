@@ -33,6 +33,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | KVM Core & x86 MMU | `virt/kvm/`, `arch/x86/kvm/`, `kvm_mmu_`, `is_page_fault_stale`, `mmu_invalidate_seq`, `gfn_to_pfn_cache`, `slots_lock` | `contexts/kvm.md` |
 | libbpf Public API | `tools/lib/bpf/`, `LIBBPF_API`, `libbpf_err`, `libbpf_err_ptr`, `libbpf_ptr` | `contexts/libbpf.md` |
 | Media / V4L2 Subdevice Core | `drivers/media/`, `include/media/`, `v4l2_subdev_`, `V4L2_SUBDEV_`, `MEDIA_BUS_FMT_` | `contexts/media.md` |
+| MIPS Architecture | `arch/mips/`, `tlb_probe`, `tlb_read`, `tlb_write_indexed`, `write_c0_entryhi`, `TLBP`, `TLBR`, `TLBWI` | `contexts/mips.md` |
 
 ## Kernel API Guides (`apis/`)
 
