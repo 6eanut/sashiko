@@ -987,6 +987,25 @@
           "tracepoint_"
         ]
       }
+    },
+    {
+      "file": "tty.md",
+      "defining_files": [
+        "include/linux/serial_core.h",
+        "drivers/tty/serial/serial_core.c"
+      ],
+      "symbols": {
+        "exact": [
+          "uart_add_one_port",
+          "uart_remove_one_port",
+          "uart_ops",
+          "uart_configure_port",
+          "uart_change_pm"
+        ],
+        "prefixes": [
+          "uart_"
+        ]
+      }
     }
   ]
 }

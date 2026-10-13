@@ -796,6 +796,19 @@
         "kernfs_find_and_get",
         "SYSFS_GROUP_INVISIBLE"
       ]
+    },
+    {
+      "file": "tty.md",
+      "covered_paths": [
+        "drivers/tty/"
+      ],
+      "triggers": [
+        "drivers/tty/",
+        "8250_base",
+        "8250_port",
+        "8250_core",
+        "serial_core"
+      ]
     }
   ]
 }
