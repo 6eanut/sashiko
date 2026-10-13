@@ -17,6 +17,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | CXL | `drivers/cxl/`, `cxl_`, `hmat_get_extended_linear_cache_size` | `contexts/cxl.md` |
 | DAX | `fs/dax.c`, `drivers/dax/`, `dax_layout_busy_page`, `dax_iomap_`, `dax_writeback_mapping_range` | `contexts/dax.md` |
 | DRM / GPU | `drivers/gpu/drm/`, `include/drm/`, `drm_atomic_`, `drm_gpuvm`, `amdgpu_`, `hwseq`, `xe_pm_`, `intel_cx0_` | `contexts/drm.md` |
+| Device Tree Bindings | `Documentation/devicetree/bindings/`, `$id: http://devicetree.org/schemas/` | `contexts/dt-bindings.md` |
 
 ## Kernel API Guides (`apis/`)
 
