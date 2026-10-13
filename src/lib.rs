@@ -59,6 +59,7 @@ pub mod settings;
 #[cfg(test)]
 pub(crate) mod test_support;
 pub mod toolbox;
+pub mod tree_prompts;
 pub mod utils;
 pub mod worker;
 pub mod workflow;

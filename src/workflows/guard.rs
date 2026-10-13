@@ -44,10 +44,80 @@ pub fn sanitize_prompt_relpath(path: &str) -> bool {
         return false;
     }
     let parts: Vec<&str> = trimmed.split('/').collect();
+    if parts
+        .iter()
+        .any(|p| p.is_empty() || *p == "." || *p == "..")
+    {
+        return false;
+    }
     match parts.as_slice() {
-        [file] => !file.is_empty(),
-        [dir, file] => matches!(*dir, "subsystem" | "patterns") && !file.is_empty(),
+        [_file] => true,
+        [dir, _file] => matches!(
+            *dir,
+            "subsystem" | "patterns" | "framing" | "maintainers" | "contexts" | "apis"
+        ),
+        [dir, rest @ ..] if matches!(*dir, "contexts" | "apis") => !rest.is_empty(),
+        ["trees", _tree_id, "index.md"] => true,
+        ["trees", _tree_id, kind, rest @ ..] if matches!(*kind, "contexts" | "apis") => {
+            !rest.is_empty()
+        }
         _ => false,
+    }
+}
+
+/// Validates and normalizes a tree-scoped prompt relative path returned by an
+/// LLM (e.g. `additional_contexts` or `additional_apis` during `pre-screen`)
+/// into a canonical path under `trees/<tree_id>/<kind>/...`.
+///
+/// Accepts either a bare path under `<kind>/` (e.g. `"mm-vma.md"`,
+/// `"net/core/skbuff.md"`), a `<kind>/`-prefixed path (e.g.
+/// `"contexts/mm-vma.md"`), or a full `"trees/<tree_id>/<kind>/..."` path,
+/// while rejecting any traversal or mismatched category.
+pub fn normalize_tree_prompt_relpath(
+    raw: &str,
+    tree_id: &str,
+    expected_kind: &str,
+) -> Option<String> {
+    if !matches!(expected_kind, "contexts" | "apis") {
+        return None;
+    }
+    let trimmed = raw.trim();
+    if trimmed.is_empty()
+        || trimmed.starts_with('/')
+        || trimmed.contains('\\')
+        || trimmed.contains("..")
+        || !trimmed.ends_with(".md")
+    {
+        return None;
+    }
+    let parts: Vec<&str> = trimmed.split('/').collect();
+    if parts
+        .iter()
+        .any(|p| p.is_empty() || *p == "." || *p == "..")
+    {
+        return None;
+    }
+    let tail: &[&str] = match parts.as_slice() {
+        ["trees", tid, kind, rest @ ..] => {
+            if *tid != tree_id || *kind != expected_kind || rest.is_empty() {
+                return None;
+            }
+            rest
+        }
+        [kind, rest @ ..] if matches!(*kind, "contexts" | "apis") => {
+            if *kind != expected_kind || rest.is_empty() {
+                return None;
+            }
+            rest
+        }
+        ["subsystem" | "patterns" | "maintainers" | "framing", ..] => return None,
+        rest => rest,
+    };
+    let normalized = format!("trees/{}/{}/{}", tree_id, expected_kind, tail.join("/"));
+    if sanitize_prompt_relpath(&normalized) {
+        Some(normalized)
+    } else {
+        None
     }
 }
 
@@ -88,12 +158,56 @@ mod tests {
         assert!(sanitize_prompt_relpath("callstack.md"));
         assert!(sanitize_prompt_relpath("subsystem/locking.md"));
         assert!(sanitize_prompt_relpath("patterns/rust-async.md"));
+        assert!(sanitize_prompt_relpath("maintainers/networking.md"));
+        assert!(sanitize_prompt_relpath("contexts/mm-vma.md"));
+        assert!(sanitize_prompt_relpath("contexts/net/core/skbuff.md"));
+        assert!(sanitize_prompt_relpath("apis/rcu.md"));
+        assert!(sanitize_prompt_relpath("trees/mainline/index.md"));
+        assert!(sanitize_prompt_relpath("trees/mainline/contexts/mm-vma.md"));
+        assert!(sanitize_prompt_relpath(
+            "trees/linux-5.2.y/contexts/net/core/skbuff.md"
+        ));
+        assert!(sanitize_prompt_relpath("trees/mainline/apis/rcu.md"));
         assert!(!sanitize_prompt_relpath(""));
         assert!(!sanitize_prompt_relpath("../secret.md"));
         assert!(!sanitize_prompt_relpath("/etc/passwd.md"));
         assert!(!sanitize_prompt_relpath("other/file.md"));
         assert!(!sanitize_prompt_relpath("subsystem/nested/file.md"));
+        assert!(!sanitize_prompt_relpath("maintainers/nested/file.md"));
+        assert!(!sanitize_prompt_relpath("trees/mainline/other/file.md"));
         assert!(!sanitize_prompt_relpath("locking.txt"));
+    }
+
+    #[test]
+    fn test_normalize_tree_prompt_relpath() {
+        assert_eq!(
+            normalize_tree_prompt_relpath("mm-vma.md", "mainline", "contexts"),
+            Some("trees/mainline/contexts/mm-vma.md".to_string())
+        );
+        assert_eq!(
+            normalize_tree_prompt_relpath("net/core/skbuff.md", "mainline", "contexts"),
+            Some("trees/mainline/contexts/net/core/skbuff.md".to_string())
+        );
+        assert_eq!(
+            normalize_tree_prompt_relpath("contexts/mm-vma.md", "linux-6.6.y", "contexts"),
+            Some("trees/linux-6.6.y/contexts/mm-vma.md".to_string())
+        );
+        assert_eq!(
+            normalize_tree_prompt_relpath("trees/mainline/apis/rcu.md", "mainline", "apis"),
+            Some("trees/mainline/apis/rcu.md".to_string())
+        );
+        assert_eq!(
+            normalize_tree_prompt_relpath("apis/rcu.md", "mainline", "contexts"),
+            None
+        );
+        assert_eq!(
+            normalize_tree_prompt_relpath("trees/linux-5.2.y/apis/rcu.md", "mainline", "apis"),
+            None
+        );
+        assert_eq!(
+            normalize_tree_prompt_relpath("../secret.md", "mainline", "contexts"),
+            None
+        );
     }
 
     #[test]

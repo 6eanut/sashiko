@@ -411,6 +411,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let settings = anyhow::Context::with_context(settings_result, || {
                     format!("Failed to load settings from {}", settings_path.display())
                 })?;
+                let prompts_path = resolve_prompts_path(
+                    prompts.clone(),
+                    settings.prompts.overlay_path.as_deref(),
+                    project,
+                )?;
 
                 return handle_review_command(
                     project,
@@ -419,7 +424,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     settings,
                     *report_preexisting,
                     custom_prompt.clone(),
-                    resolve_prompts_path(prompts.clone(), project)?,
+                    prompts_path,
                     *format,
                     *agent,
                     *color,
@@ -450,12 +455,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         settings_path.display()
                     )),
                 };
+                let prompts_path = resolve_prompts_path(
+                    prompts.clone(),
+                    settings.prompts.overlay_path.as_deref(),
+                    project,
+                )?;
 
                 let result = run_worker_from_stdin(
                     WorkerOptions {
                         project,
                         baseline: baseline.clone(),
-                        prompts: resolve_prompts_path(prompts.clone(), project)?,
+                        prompts: prompts_path,
                         review_patch_index: *review_patch_index,
                         review_commit: review_commit.clone(),
                         reuse_worktree: reuse_worktree.clone(),
@@ -1514,13 +1524,17 @@ fn effective_project(
 
 fn resolve_prompts_path(
     path: Option<PathBuf>,
+    overlay_path: Option<&str>,
     project: ProjectId,
 ) -> Result<PathBuf, Box<dyn std::error::Error>> {
     if let Some(path) = path {
         return Ok(path);
     }
 
-    Ok(prompt_bundle::project_prompts_path(project)?)
+    Ok(prompt_bundle::project_prompts_path_with_overlay(
+        project,
+        overlay_path.map(Path::new),
+    )?)
 }
 
 #[derive(Debug, Clone, PartialEq)]

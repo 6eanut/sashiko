@@ -11,3 +11,8 @@ explicit_prompt_caching = false
 # Reviews run concurrently up to this many patches. Sized for one developer's
 # machine; the daemon's own Settings.toml uses a much larger fan-out.
 concurrency = 4
+
+# [prompts]
+# Optional writable prompt overlay directory (falls back to compiled-in bundle).
+# overlay_path = "/var/lib/sashiko/prompts"
+

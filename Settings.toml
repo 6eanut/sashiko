@@ -240,5 +240,8 @@ fix_check_enabled = false
 # Maximum number of open bugs to evaluate per upstream fix check cycle.
 # fix_check_batch_size = 50
 
-
+[prompts]
+# Optional path to a writable Git-backed prompt overlay directory.
+# Falls back to the compiled-in prompt bundle when unset or missing.
+# overlay_path = "/var/lib/sashiko/prompts"
 

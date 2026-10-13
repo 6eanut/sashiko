@@ -968,6 +968,15 @@ impl Default for LinuxBugSettings {
     }
 }
 
+#[derive(Debug, Default, Deserialize, Clone, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct PromptsSettings {
+    /// Optional path to a writable Git-backed prompt overlay directory.
+    /// Falls back to the compiled-in prompt bundle when unset or missing.
+    #[serde(default)]
+    pub overlay_path: Option<String>,
+}
+
 #[derive(Debug, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
 #[allow(unused)]
@@ -1002,6 +1011,8 @@ pub struct Settings {
     pub review: ReviewSettings,
     #[serde(default, alias = "bugs")]
     pub linux_bug: LinuxBugSettings,
+    #[serde(default)]
+    pub prompts: PromptsSettings,
 }
 
 /// What a command line can say that a settings file says too.
@@ -1865,5 +1876,21 @@ mod tests {
         assert!(custom.fix_check_enabled);
         assert_eq!(custom.fix_check_interval_seconds, 3600);
         assert_eq!(custom.fix_check_batch_size, 20);
+    }
+
+    #[test]
+    fn test_prompts_settings_default_and_parse() {
+        let default_prompts = PromptsSettings::default();
+        assert_eq!(default_prompts.overlay_path, None);
+
+        let settings = Settings::new().unwrap();
+        assert_eq!(settings.prompts.overlay_path, None);
+
+        let custom: PromptsSettings =
+            toml::from_str("overlay_path = \"/var/lib/sashiko/prompts\"\n").unwrap();
+        assert_eq!(
+            custom.overlay_path.as_deref(),
+            Some("/var/lib/sashiko/prompts")
+        );
     }
 }

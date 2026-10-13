@@ -20,6 +20,7 @@ use std::path::{Path, PathBuf};
 fn main() {
     println!("cargo:rerun-if-changed=third_party/prompts");
     println!("cargo:rerun-if-changed=projects");
+    println!("cargo:rerun-if-changed=prompts");
 
     track_git_changes();
 
@@ -43,19 +44,33 @@ fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let vendored_dir = manifest_dir.join("third_party/prompts");
     let projects_dir = manifest_dir.join("projects");
+    let root_prompts_dir = manifest_dir.join("prompts");
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let generated = out_dir.join("prompts_generated.rs");
 
-    // Both trees flatten into one bundle namespace, so a project directory
-    // appearing in both would have one copy silently win depending on
+    // All three trees flatten into one bundle namespace, so a relative path
+    // appearing in more than one would have one copy silently win depending on
     // collection order. Collect them separately to name the offender.
     let vendored = collect_root(&vendored_dir);
-    let first_party = collect_projects_prompts(&projects_dir);
+    let mut first_party = collect_projects_prompts(&projects_dir);
+    if root_prompts_dir.is_dir() {
+        let root_first_party = collect_root(&root_prompts_dir);
+        for (relative, abs) in root_first_party {
+            if first_party.iter().any(|(other, _)| other == &relative) {
+                panic!(
+                    "prompt {relative} exists in both projects/ and prompts/; \
+                     they share one bundle namespace, so one would silently shadow the other"
+                );
+            }
+            first_party.push((relative, abs));
+        }
+        first_party.sort_by(|a, b| a.0.cmp(&b.0));
+    }
 
     for (relative, _) in &first_party {
         if vendored.iter().any(|(other, _)| other == relative) {
             panic!(
-                "prompt {relative} exists in both third_party/prompts and projects; \
+                "prompt {relative} exists in both third_party/prompts and first-party prompts; \
                  they share one bundle namespace, so one would silently shadow the other"
             );
         }

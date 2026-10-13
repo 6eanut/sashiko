@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{Context, Result};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::project::ProjectId;
 
@@ -29,6 +29,31 @@ const COMPLETE_MARKER: &str = ".sashiko-prompts-complete";
 /// project with no prompts at all into a review that runs with an empty system
 /// prompt and reports nothing.
 pub fn project_prompts_path(project: ProjectId) -> Result<PathBuf> {
+    project_prompts_path_with_overlay(project, None)
+}
+
+/// Resolves the prompt directory for `project`, preferring an optional writable
+/// Git-backed `overlay_path` when it exists on disk and falling back to the
+/// compiled-in prompt bundle.
+pub fn project_prompts_path_with_overlay(
+    project: ProjectId,
+    overlay_path: Option<&Path>,
+) -> Result<PathBuf> {
+    if let Some(overlay) = overlay_path {
+        let project_subdir = overlay.join(project.prompt_dir());
+        if project_subdir.is_dir() {
+            return Ok(project_subdir);
+        }
+        if overlay.is_dir()
+            && overlay
+                .file_name()
+                .and_then(|n| n.to_str())
+                .is_some_and(|n| n == project.prompt_dir())
+        {
+            return Ok(overlay.to_path_buf());
+        }
+    }
+
     let root = install_prompt_bundle(false)?;
     let path = root.join(project.prompt_dir());
     if !path.is_dir() {
@@ -210,5 +235,21 @@ mod tests {
                 "guide {guide} referenced in sashiko/subsystem/subsystem.md not found in bundle under subsystem/ or patterns/"
             );
         }
+    }
+
+    #[test]
+    fn test_project_prompts_path_with_overlay() {
+        let temp = tempfile::tempdir().unwrap();
+        let kernel_sub = temp.path().join("kernel");
+        std::fs::create_dir_all(&kernel_sub).unwrap();
+
+        assert_eq!(
+            project_prompts_path_with_overlay(ProjectId::Linux, Some(temp.path())).unwrap(),
+            kernel_sub
+        );
+        assert_eq!(
+            project_prompts_path_with_overlay(ProjectId::Linux, Some(&kernel_sub)).unwrap(),
+            kernel_sub
+        );
     }
 }

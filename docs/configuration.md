@@ -296,6 +296,14 @@ reviews are ignored and the background bug worker is not started.
 | `fix_check_interval_seconds` | integer | `21600` | Interval in seconds between periodic upstream fix checks against the mainline tree. Set to `0` to disable periodic checks. |
 | `fix_check_batch_size` | integer | `50` | Maximum number of open bugs evaluated per upstream fix check cycle. |
 
+### `[prompts]`
+
+Optional. Controls prompt directory resolution for reviews.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `overlay_path` | string | -- | Optional path to a writable Git-backed prompt overlay directory (either containing `<project>/` or named after the project's prompt directory). When unset or absent on disk, Sashiko falls back to the compiled-in prompt bundle installed under `$XDG_DATA_HOME/sashiko/prompts/`. Overridden by `--prompts` on `sashiko review` and `sashiko worker`. |
+
 ### `[subsystems]`
 
 Controls how patches and emails are categorized into subsystems for targeted reviews and specific email policies. By default, this section is empty, meaning the system relies on fallback heuristics (like identifying `@vger.kernel.org` addresses) to determine subsystems.
