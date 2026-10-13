@@ -41,7 +41,6 @@ and symbols regexes.
 | Syscalls | `SYSCALL_DEFINE`, `copy_from_user`, `copy_to_user`, `get_user`, `put_user`, any change to syscall parameter validation | syscall.md |
 | btrfs | fs/btrfs/ | btrfs.md |
 | DAX | dax operations | dax.md |
-| Block/NVMe | block layer, nvme | block.md |
 | Boot Parameters | `__setup("`, `early_param("`, `module_param(`, `module_param_named(`, `core_param(`, `boot parameter`, `cmdline`, `command-line` | boot-params.md |
 | DRM/GPU | drivers/gpu/drm/, include/drm/, include/uapi/drm/, drm_atomic_, drm_crtc_, amdgpu_, amdkfd, hwseq, hw_sequencer | drm.md |
 | Media/V4L2 | drivers/media/, include/media/, v4l2_subdev_, V4L2_SUBDEV_, MEDIA_BUS_FMT_ | media.md |

@@ -27,6 +27,23 @@
         "ata_read_log_",
         "ATA_QUIRK_"
       ]
+    },
+    {
+      "file": "block.md",
+      "covered_paths": [
+        "block/",
+        "drivers/nvme/",
+        "include/linux/blk-mq.h",
+        "include/linux/bio.h"
+      ],
+      "triggers": [
+        "block/",
+        "drivers/nvme/",
+        "blk_mq_",
+        "elevator_mq_ops",
+        "depth_updated",
+        "nr_requests"
+      ]
     }
   ]
 }

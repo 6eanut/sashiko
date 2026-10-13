@@ -22,6 +22,33 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "block.md",
+      "defining_files": [
+        "include/linux/blk-mq.h",
+        "include/linux/bio.h",
+        "block/bio.c",
+        "block/bio-integrity.c",
+        "block/bio-integrity-auto.c"
+      ],
+      "symbols": {
+        "exact": [
+          "blk_mq_freeze_queue",
+          "blk_mq_unfreeze_queue",
+          "bio_has_data",
+          "op_is_write",
+          "bio_alloc",
+          "bio_alloc_bioset",
+          "bvec_alloc",
+          "bio_integrity_prep",
+          "bio_integrity_alloc_buf",
+          "bio_kmalloc"
+        ],
+        "prefixes": [
+          "bio_for_each_"
+        ]
+      }
     }
   ]
 }
