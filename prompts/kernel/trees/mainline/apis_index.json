@@ -490,6 +490,37 @@
           "xas_"
         ]
       }
+    },
+    {
+      "file": "mm-largepage.md",
+      "defining_files": [
+        "include/linux/huge_mm.h",
+        "include/linux/hugetlb.h",
+        "include/linux/page-flags.h",
+        "include/linux/pagemap.h"
+      ],
+      "symbols": {
+        "exact": [
+          "split_folio",
+          "split_huge_page",
+          "split_folio_to_list",
+          "try_folio_split_to_order",
+          "min_order_for_split",
+          "mapping_min_folio_order",
+          "folio_put_refs",
+          "folio_test_large",
+          "folio_test_hugetlb",
+          "folio_hstate",
+          "size_to_hstate",
+          "is_vm_hugetlb_page",
+          "pmd_trans_huge",
+          "PageHWPoison",
+          "folio_contain_hwpoisoned_page"
+        ],
+        "prefixes": [
+          "split_huge_"
+        ]
+      }
     }
   ]
 }

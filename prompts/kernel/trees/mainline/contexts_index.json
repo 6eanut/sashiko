@@ -496,6 +496,27 @@
         "folio_set_swapbacked",
         "pfn_to_online_page"
       ]
+    },
+    {
+      "file": "mm-largepage.md",
+      "covered_paths": [
+        "mm/huge_memory.c",
+        "mm/hugetlb.c",
+        "mm/memory-failure.c",
+        "fs/hugetlbfs/"
+      ],
+      "triggers": [
+        "mm/huge_memory.c",
+        "mm/hugetlb.c",
+        "mm/memory-failure.c",
+        "hugetlb",
+        "hstate",
+        "huge_pmd_",
+        "memory_failure",
+        "unmap_poisoned_folio",
+        "deferred_split_folio",
+        "non_swapcache_batch"
+      ]
     }
   ]
 }
