@@ -699,6 +699,23 @@
         "genpd_power_off",
         "exynos_pd_"
       ]
+    },
+    {
+      "file": "rust.md",
+      "covered_paths": [
+        "rust/",
+        ".rs"
+      ],
+      "triggers": [
+        "rust/",
+        ".rs",
+        "__rust_helper",
+        "rust_helper_",
+        "RUST_CONST_HELPER_",
+        "try_pin_init",
+        "pin_init",
+        "build_assert!"
+      ]
     }
   ]
 }

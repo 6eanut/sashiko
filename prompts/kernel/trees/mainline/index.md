@@ -46,6 +46,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Open Firmware (DT) Core & MSI | `drivers/of/`, `of_msi_xlate`, `of_msi_get_domain`, `msi-map`, `msi-parent` | `contexts/of.md` |
 | Perf Tools (`tools/perf/`) | `tools/perf/`, `perf_tool`, `perf_env`, `DECLARE_RC_STRUCT`, `thread__get`, `maps__get`, `fdopendir` | `contexts/perf.md` |
 | Generic Power Domains (`genpd`) | `drivers/pmdomain/`, `pm_genpd_`, `of_genpd_`, `GENPD_FLAG_NO_STAY_ON`, `exynos_pd_` | `contexts/pmdomain.md` |
+| Kernel Rust Toolchain & Pin-Init | `rust/`, `*.rs`, `__rust_helper`, `rust_helper_`, `RUST_CONST_HELPER_`, `try_pin_init`, `pin_init`, `build_assert!` | `contexts/rust.md` |
 
 ## Kernel API Guides (`apis/`)
 

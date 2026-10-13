@@ -208,6 +208,19 @@
       "paths": [
         "tools/perf/"
       ]
+    },
+    {
+      "file": "rust.md",
+      "sections": [
+        "RUST",
+        "RUST [ALLOC]",
+        "RUST [PIN-INIT]",
+        "RUST [SYNC]"
+      ],
+      "paths": [
+        "rust/",
+        "Documentation/rust/"
+      ]
     }
   ]
 }
