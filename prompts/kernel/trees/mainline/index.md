@@ -16,6 +16,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Build System & Compiler | `Kbuild`, `Makefile`, `scripts/`, `gnu11`, `-funsigned-char`, `-fno-strict-aliasing` | `contexts/build.md` |
 | CXL | `drivers/cxl/`, `cxl_`, `hmat_get_extended_linear_cache_size` | `contexts/cxl.md` |
 | DAX | `fs/dax.c`, `drivers/dax/`, `dax_layout_busy_page`, `dax_iomap_`, `dax_writeback_mapping_range` | `contexts/dax.md` |
+| DRM / GPU | `drivers/gpu/drm/`, `include/drm/`, `drm_atomic_`, `drm_gpuvm`, `amdgpu_`, `hwseq`, `xe_pm_`, `intel_cx0_` | `contexts/drm.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -27,3 +28,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | BPF Kfuncs & Skeletons | `__bpf_kfunc`, `BTF_KFUNCS_*`, `bpf_program__fd`, `bpf_map__fd`, `__open_and_load` | `apis/bpf.md` |
 | BTF Map Field Helpers | `check_and_init_map_value`, `bpf_obj_cancel_fields`, `bpf_obj_free_fields`, `copy_map_value` | `apis/btf.md` |
 | Cleanup & Guard API | `__free`, `guard`, `scoped_guard`, `DEFINE_FREE`, `DEFINE_GUARD`, `no_free_ptr`, `return_ptr`, `retain_and_null_ptr` | `apis/cleanup.md` |
+| DRM, Overflow & fwnode APIs | `struct_size`, `fwnode_create_software_node`, `stack_depot_save`, `xe_device_get_gt`, `msm_context_vm`, `amdgpu_bo_create_kernel`, `intel_cx0_rmw` | `apis/drm.md` |

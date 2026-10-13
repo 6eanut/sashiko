@@ -151,6 +151,29 @@
         "dax_iomap_",
         "dax_writeback_mapping_range"
       ]
+    },
+    {
+      "file": "drm.md",
+      "covered_paths": [
+        "drivers/gpu/drm/",
+        "include/drm/",
+        "include/uapi/drm/"
+      ],
+      "triggers": [
+        "drivers/gpu/drm/",
+        "include/drm/",
+        "drm_atomic_",
+        "drm_crtc_",
+        "drm_gpuvm",
+        "amdgpu_",
+        "amdkfd",
+        "hwseq",
+        "hw_sequencer",
+        "xe_pm_",
+        "xe_pcode_",
+        "IS_SRIOV_VF",
+        "intel_cx0_"
+      ]
     }
   ]
 }

@@ -37,7 +37,6 @@ and symbols regexes.
 | Tracing | trace_, tracepoints | tracing.md |
 | Workqueue | kernel/workqueue.c, work_struct | workqueue.md |
 | Syscalls | `SYSCALL_DEFINE`, `copy_from_user`, `copy_to_user`, `get_user`, `put_user`, any change to syscall parameter validation | syscall.md |
-| DRM/GPU | drivers/gpu/drm/, include/drm/, include/uapi/drm/, drm_atomic_, drm_crtc_, amdgpu_, amdkfd, hwseq, hw_sequencer | drm.md |
 | Media/V4L2 | drivers/media/, include/media/, v4l2_subdev_, V4L2_SUBDEV_, MEDIA_BUS_FMT_ | media.md |
 | NFSD | fs/nfsd/*, fs/lockd/* | nfsd.md |
 | SunRPC | net/sunrpc/* | sunrpc.md |

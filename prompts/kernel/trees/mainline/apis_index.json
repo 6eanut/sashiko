@@ -126,6 +126,37 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "drm.md",
+      "defining_files": [
+        "include/linux/overflow.h",
+        "include/linux/property.h",
+        "include/linux/stackdepot.h",
+        "drivers/gpu/drm/xe/xe_gt.h",
+        "drivers/gpu/drm/amd/amdgpu/amdgpu_object.c"
+      ],
+      "symbols": {
+        "exact": [
+          "struct_size",
+          "array_size",
+          "fwnode_create_software_node",
+          "stack_depot_save",
+          "xe_device_get_gt",
+          "xe_root_mmio_gt",
+          "msm_context_vm",
+          "amdgpu_bo_create_kernel",
+          "amdgpu_bo_create_reserved",
+          "amdgpu_gmc_pd_addr",
+          "amdgpu_bo_gpu_offset",
+          "intel_cx0_phy_transaction_begin",
+          "intel_cx0_rmw",
+          "intel_cx0_read",
+          "intel_cx0_write",
+          "drm_dp_dpcd_probe"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }
