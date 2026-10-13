@@ -31,7 +31,6 @@ and symbols regexes.
 | Locking | spin_lock*, mutex_*, rwsem*, seqlock*, *seqcount* | locking.md |
 | Scheduler | kernel/sched/, sched_, schedule, *wakeup* | scheduler.md |
 | Timers | timer_list, timer_setup, mod_timer, del_timer, hrtimer, delayed_work | timers.md |
-| BTF Fields | `map_check_btf`, `check_and_init_map_value`, `bpf_obj_free_fields`, `BPF_SPIN_LOCK`, `BPF_TIMER`, `BPF_KPTR` | btf.md |
 | Libbpf API | tools/lib/bpf/, `LIBBPF_API`, `libbpf_err`, `libbpf_err_ptr` | libbpf.md |
 | RCU | rcu*, call_rcu, synchronize_rcu, kfree_rcu, kvfree_call_rcu | rcu.md |
 | Encryption | crypto, fscrypt_ | fscrypt.md |

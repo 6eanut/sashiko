@@ -76,6 +76,25 @@
         "check_kfunc_args",
         "verifier"
       ]
+    },
+    {
+      "file": "btf.md",
+      "covered_paths": [
+        "kernel/bpf/"
+      ],
+      "triggers": [
+        "map_check_btf",
+        "btf_parse_fields",
+        "BPF_SPIN_LOCK",
+        "BPF_RES_SPIN_LOCK",
+        "BPF_TIMER",
+        "BPF_KPTR",
+        "BPF_LIST_HEAD",
+        "BPF_RB_ROOT",
+        "BPF_WORKQUEUE",
+        "BPF_TASK_WORK",
+        "BPF_UPTR"
+      ]
     }
   ]
 }

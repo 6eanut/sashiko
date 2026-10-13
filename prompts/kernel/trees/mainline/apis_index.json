@@ -87,6 +87,23 @@
           "BTF_KFUNCS_"
         ]
       }
+    },
+    {
+      "file": "btf.md",
+      "defining_files": [
+        "include/linux/bpf.h",
+        "kernel/bpf/syscall.c"
+      ],
+      "symbols": {
+        "exact": [
+          "check_and_init_map_value",
+          "bpf_obj_cancel_fields",
+          "bpf_obj_free_fields",
+          "copy_map_value",
+          "copy_map_value_locked"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }
