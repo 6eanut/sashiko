@@ -956,6 +956,37 @@
           "hrtimer_"
         ]
       }
+    },
+    {
+      "file": "tracing.md",
+      "defining_files": [
+        "include/linux/tracepoint.h",
+        "include/trace/define_trace.h",
+        "include/rv/instrumentation.h"
+      ],
+      "symbols": {
+        "exact": [
+          "TRACE_EVENT",
+          "TRACE_EVENT_CONDITION",
+          "TRACE_EVENT_SYSCALL",
+          "DECLARE_TRACE_SYSCALL",
+          "TP_STRUCT__entry",
+          "TP_fast_assign",
+          "__string",
+          "__assign_str",
+          "__vstring",
+          "__assign_vstr",
+          "CREATE_TRACE_POINTS",
+          "tracepoint_probe_register",
+          "tracepoint_probe_unregister",
+          "tracepoint_synchronize_unregister",
+          "rv_attach_trace_probe"
+        ],
+        "prefixes": [
+          "trace_",
+          "tracepoint_"
+        ]
+      }
     }
   ]
 }

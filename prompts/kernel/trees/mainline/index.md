@@ -92,3 +92,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Syscall Parameter Validation & User Copy API | `SYSCALL_DEFINE*`, `copy_from_user`, `copy_to_user`, `copy_struct_from_user`, `get_user`, `put_user` | `apis/syscall.md` |
 | Sysfs Group & Kobject Lifecycle API | `sysfs_create_group`, `sysfs_update_group`, `attribute_group`, `is_visible`, `is_bin_visible`, `SYSFS_GROUP_INVISIBLE`, `kobject_create_and_add`, `kobject_put` | `apis/sysfs.md` |
 | Kernel Timers (`timer_list`, `hrtimer`, `delayed_work`) | `timer_setup`, `mod_timer`, `timer_delete_sync`, `timer_shutdown_sync`, `hrtimer_setup`, `hrtimer_cancel`, `delayed_work`, `cancel_delayed_work_sync` | `apis/timers.md` |
+| Kernel Tracepoints & `TRACE_EVENT` API | `TRACE_EVENT*`, `TP_fast_assign`, `__string`, `__assign_str`, `CREATE_TRACE_POINTS`, `tracepoint_probe_register`, `tracepoint_synchronize_unregister`, `rv_attach_trace_probe` | `apis/tracing.md` |
