@@ -727,6 +727,37 @@
           "u64_stats_"
         ]
       }
+    },
+    {
+      "file": "of.md",
+      "defining_files": [
+        "include/linux/of.h",
+        "drivers/of/base.c"
+      ],
+      "symbols": {
+        "exact": [
+          "for_each_child_of_node",
+          "for_each_available_child_of_node",
+          "for_each_reserved_child_of_node",
+          "for_each_child_of_node_scoped",
+          "for_each_available_child_of_node_scoped",
+          "for_each_node_by_type",
+          "for_each_compatible_node",
+          "for_each_matching_node",
+          "for_each_matching_node_and_match",
+          "for_each_node_with_property",
+          "for_each_property_of_node",
+          "of_node_put",
+          "of_node_get",
+          "of_parse_phandle",
+          "of_get_parent",
+          "of_get_next_parent",
+          "of_get_child_by_name"
+        ],
+        "prefixes": [
+          "of_find_"
+        ]
+      }
     }
   ]
 }

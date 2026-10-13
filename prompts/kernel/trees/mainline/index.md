@@ -43,6 +43,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Networking Core Packet Flow & XFRM | `net/core/`, `net/xfrm/`, `skb->cb`, `destructor_arg`, `xfrm_state`, `inner_mode`, `virtio_net_hdr`, `PACKET_*` | `contexts/networking-core.md` |
 | NFS Server (NFSD) Subsystem | `fs/nfsd/`, `fs/lockd/`, `fh_verify`, `nfsd4_`, `nfs4_stid`, `nfs4_preprocess_stateid_op`, `nfsd_user_namespace`, `nfserrno` | `contexts/nfsd.md` |
 | Objtool Control-Flow Validation | `tools/objtool/`, `INSN_BUG`, `INSN_TRAP`, `decode.c`, `validate_sls`, `ignore_unreachable_insn` | `contexts/objtool.md` |
+| Open Firmware (DT) Core & MSI | `drivers/of/`, `of_msi_xlate`, `of_msi_get_domain`, `msi-map`, `msi-parent` | `contexts/of.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -75,3 +76,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Netlink & Generic Netlink API | `genl_notify`, `nla_*`, `NLA_*`, `NLM_F_*`, `nlmsg_*`, `netlink_callback`, `NL_SET_BAD_ATTR`, `NL_SET_ERR_ATTR_MISS` | `apis/netlink.md` |
 | SKB, Socket, Netfilter, Routing & SNMP API | `skb_put`, `skb_push`, `skb_pull`, `pskb_may_pull`, `skb_unshare`, `release_sock`, `sock_release`, `sock_hold`, `sock_put`, `NF_HOOK`, `skb_dst_force`, `SNMP_*` | `apis/networking-core.md` |
 | 64-Bit Network Driver Statistics (`u64_stats_sync`) | `u64_stats_sync`, `u64_stats_init`, `u64_stats_update_begin`, `u64_stats_update_begin_irqsave`, `u64_stats_fetch_begin`, `u64_stats_fetch_retry` | `apis/networking-drivers.md` |
+| Open Firmware (DT) Node & Iterator API | `for_each_child_of_node*`, `for_each_available_child_of_node*`, `of_node_put`, `of_node_get`, `of_parse_phandle`, `of_get_parent`, `of_get_next_parent`, `of_find_*` | `apis/of.md` |

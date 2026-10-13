@@ -653,6 +653,20 @@
         "validate_sls",
         "ignore_unreachable_insn"
       ]
+    },
+    {
+      "file": "of.md",
+      "covered_paths": [
+        "drivers/of/"
+      ],
+      "triggers": [
+        "drivers/of/",
+        "of_msi_xlate",
+        "of_msi_get_domain",
+        "of_check_msi_parent",
+        "msi-map",
+        "msi-parent"
+      ]
     }
   ]
 }
