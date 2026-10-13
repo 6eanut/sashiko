@@ -7,6 +7,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Subsystem / Area | Triggers (Paths, Symbols, Concepts) | File |
 | :--- | :--- | :--- |
 | ARM64 Architecture | `arch/arm64/`, `.sysreg`, `ESR_ELx`, `untagged_addr`, `write_sysreg`, `TLBI`, `isb` | `contexts/arm64.md` |
+| ATA / libata | `drivers/ata/`, `ata_dev_`, `ata_port_`, `ata_read_log_`, `ATA_QUIRK_` | `contexts/ata.md` |
 
 ## Kernel API Guides (`apis/`)
 

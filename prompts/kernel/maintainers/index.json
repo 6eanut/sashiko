@@ -1,3 +1,14 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "file": "ata.md",
+      "sections": [
+        "LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)"
+      ],
+      "paths": [
+        "drivers/ata/",
+        "include/linux/libata.h"
+      ]
+    }
+  ]
 }

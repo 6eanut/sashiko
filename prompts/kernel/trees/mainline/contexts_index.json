@@ -13,6 +13,20 @@
         "write_sysreg",
         "read_sysreg"
       ]
+    },
+    {
+      "file": "ata.md",
+      "covered_paths": [
+        "drivers/ata/",
+        "include/linux/libata.h"
+      ],
+      "triggers": [
+        "drivers/ata/",
+        "ata_dev_",
+        "ata_port_",
+        "ata_read_log_",
+        "ATA_QUIRK_"
+      ]
     }
   ]
 }
