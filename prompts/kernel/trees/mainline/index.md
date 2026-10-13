@@ -37,6 +37,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | MM Page Allocator, SLUB & vmalloc | `mm/page_alloc.c`, `mm/slub.c`, `mm/vmalloc.c`, `get_page_from_freelist`, `lowmem_reserve`, `allocate_slab`, `pcp_spin_` | `contexts/mm-alloc.md` |
 | MM Folio Lifecycle & Page Cache | `mm/filemap.c`, `mm/swap.c`, `mm/truncate.c`, `page_folio`, `filemap_`, `mapping_set_update`, `folio_set_swapbacked`, `pfn_to_online_page` | `contexts/mm-folio.md` |
 | MM Large Folios, THP, Hugetlb & HWPoison | `mm/huge_memory.c`, `mm/hugetlb.c`, `mm/memory-failure.c`, `hugetlb`, `hstate`, `huge_pmd_`, `memory_failure`, `deferred_split_folio` | `contexts/mm-largepage.md` |
+| MM Page Table Internals | `mm/memory.c`, `mm/mprotect.c`, `mm/pagewalk.c`, `mm/pt_reclaim.c`, `zap_pte_range`, `change_pte_range`, `try_to_free_pte`, `flush_tlb_batched_pending` | `contexts/mm-pagetable.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -63,3 +64,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Memory Allocation, GFP & Slab API | `alloc_pages`, `__GFP_*`, `kmalloc`, `kzalloc`, `kmem_cache_*`, `vmalloc`, `mempool_alloc`, `memblock_*`, `gfpflags_allow_blocking`, `ARCH_KMALLOC_MINALIGN` | `apis/mm-alloc.md` |
 | Folio, Page Cache & XArray API | `folio_*`, `page_folio`, `folio_expected_ref_count`, `folio_end_read`, `kmap_local_folio`, `find_get_entries`, `xas_next`, `xas_advance`, `xa_get_order` | `apis/mm-folio.md` |
 | Large Folio, THP & Hugetlb API | `split_folio`, `split_huge_page`, `try_folio_split_to_order`, `min_order_for_split`, `folio_put_refs`, `folio_hstate`, `is_vm_hugetlb_page`, `pmd_trans_huge`, `PageHWPoison` | `apis/mm-largepage.md` |
+| Page Table Accessors, Batching & Walkers | `pte_*`, `pmd_*`, `pud_*`, `set_ptes`, `folio_pte_batch`, `folio_pte_batch_flags`, `folio_mk_pmd`, `softleaf_*`, `page_vma_mapped_walk`, `walk_page_range`, `pte_offset_map_lock`, `pages_identical` | `apis/mm-pagetable.md` |

@@ -521,6 +521,47 @@
           "split_huge_"
         ]
       }
+    },
+    {
+      "file": "mm-pagetable.md",
+      "defining_files": [
+        "include/linux/pgtable.h",
+        "include/linux/pagewalk.h",
+        "include/linux/rmap.h",
+        "include/linux/leafops.h",
+        "include/linux/swapops.h",
+        "mm/internal.h"
+      ],
+      "symbols": {
+        "exact": [
+          "set_ptes",
+          "folio_pte_batch",
+          "folio_pte_batch_flags",
+          "FPB_RESPECT_WRITE",
+          "folio_mk_pmd",
+          "folio_mk_pud",
+          "pte_mkspecial",
+          "pmd_folio",
+          "pmd_page",
+          "page_vma_mapped_walk",
+          "walk_page_range",
+          "pte_offset_map_lock",
+          "pte_unmap_unlock",
+          "pages_identical",
+          "test_and_set_bit_lock",
+          "clear_bit_unlock",
+          "pgd_populate_kernel",
+          "arch_leave_lazy_mmu_mode"
+        ],
+        "prefixes": [
+          "pte_",
+          "ptep_",
+          "pmd_",
+          "pud_",
+          "softleaf_",
+          "tlb_"
+        ]
+      }
     }
   ]
 }

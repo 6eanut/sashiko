@@ -517,6 +517,31 @@
         "deferred_split_folio",
         "non_swapcache_batch"
       ]
+    },
+    {
+      "file": "mm-pagetable.md",
+      "covered_paths": [
+        "mm/memory.c",
+        "mm/mprotect.c",
+        "mm/mremap.c",
+        "mm/pagewalk.c",
+        "mm/page_vma_mapped.c",
+        "mm/pt_reclaim.c",
+        "mm/mmu_gather.c"
+      ],
+      "triggers": [
+        "mm/memory.c",
+        "mm/mprotect.c",
+        "mm/pagewalk.c",
+        "mm/page_vma_mapped.c",
+        "mm/pt_reclaim.c",
+        "zap_pte_range",
+        "change_pte_range",
+        "try_to_free_pte",
+        "flush_tlb_batched_pending",
+        "pgtable_supports_soft_dirty",
+        "pte_range_none"
+      ]
     }
   ]
 }
