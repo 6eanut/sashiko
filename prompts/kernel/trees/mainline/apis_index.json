@@ -104,6 +104,28 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "cleanup.md",
+      "defining_files": [
+        "include/linux/cleanup.h",
+        "include/linux/slab.h"
+      ],
+      "symbols": {
+        "exact": [
+          "__free",
+          "guard",
+          "scoped_guard",
+          "DEFINE_FREE",
+          "DEFINE_GUARD",
+          "DEFINE_LOCK_GUARD_1",
+          "DEFINE_LOCK_GUARD_0",
+          "no_free_ptr",
+          "return_ptr",
+          "retain_and_null_ptr"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

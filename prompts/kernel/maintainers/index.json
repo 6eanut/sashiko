@@ -47,6 +47,15 @@
         "scripts/",
         "tools/objtool/"
       ]
+    },
+    {
+      "file": "cleanup.md",
+      "sections": [
+        "GENERIC INCLUDE/LINUX/ HEADERS"
+      ],
+      "paths": [
+        "include/linux/cleanup.h"
+      ]
     }
   ]
 }

@@ -24,3 +24,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Boot & Module Parameters | `__setup`, `early_param`, `module_param`, `module_param_named`, `core_param` | `apis/boot-params.md` |
 | BPF Kfuncs & Skeletons | `__bpf_kfunc`, `BTF_KFUNCS_*`, `bpf_program__fd`, `bpf_map__fd`, `__open_and_load` | `apis/bpf.md` |
 | BTF Map Field Helpers | `check_and_init_map_value`, `bpf_obj_cancel_fields`, `bpf_obj_free_fields`, `copy_map_value` | `apis/btf.md` |
+| Cleanup & Guard API | `__free`, `guard`, `scoped_guard`, `DEFINE_FREE`, `DEFINE_GUARD`, `no_free_ptr`, `return_ptr`, `retain_and_null_ptr` | `apis/cleanup.md` |
