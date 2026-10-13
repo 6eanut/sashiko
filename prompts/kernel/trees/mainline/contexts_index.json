@@ -1,3 +1,18 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "file": "arm64.md",
+      "covered_paths": [
+        "arch/arm64/"
+      ],
+      "triggers": [
+        "arch/arm64/",
+        "sysreg",
+        "ESR_ELx",
+        "untagged_addr",
+        "write_sysreg",
+        "read_sysreg"
+      ]
+    }
+  ]
 }

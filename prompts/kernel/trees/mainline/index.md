@@ -6,6 +6,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 
 | Subsystem / Area | Triggers (Paths, Symbols, Concepts) | File |
 | :--- | :--- | :--- |
+| ARM64 Architecture | `arch/arm64/`, `.sysreg`, `ESR_ELx`, `untagged_addr`, `write_sysreg`, `TLBI`, `isb` | `contexts/arm64.md` |
 
 ## Kernel API Guides (`apis/`)
 
