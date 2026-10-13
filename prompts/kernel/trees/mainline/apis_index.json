@@ -706,6 +706,27 @@
           "SNMP_"
         ]
       }
+    },
+    {
+      "file": "networking-drivers.md",
+      "defining_files": [
+        "include/linux/u64_stats_sync.h"
+      ],
+      "symbols": {
+        "exact": [
+          "u64_stats_sync",
+          "u64_stats_init",
+          "u64_stats_update_begin",
+          "u64_stats_update_end",
+          "u64_stats_update_begin_irqsave",
+          "u64_stats_update_end_irqrestore",
+          "u64_stats_fetch_begin",
+          "u64_stats_fetch_retry"
+        ],
+        "prefixes": [
+          "u64_stats_"
+        ]
+      }
     }
   ]
 }

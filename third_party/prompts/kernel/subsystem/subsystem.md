@@ -17,7 +17,6 @@ and symbols regexes.
 
 | Subsystem | Triggers | File |
 |-----------|----------|------|
-| Networking Drivers | drivers/net/, ethtool_ops, net_device_ops | networking-drivers.md |
 | VFS | inode, dentry, vfs_, fs/*.c | vfs.md |
 | Scheduler | kernel/sched/, sched_, schedule, *wakeup* | scheduler.md |
 | Timers | timer_list, timer_setup, mod_timer, del_timer, hrtimer, delayed_work | timers.md |

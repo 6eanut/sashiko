@@ -161,6 +161,18 @@
         "include/net/netlink.h",
         "include/net/genetlink.h"
       ]
+    },
+    {
+      "file": "networking-drivers.md",
+      "sections": [
+        "NETWORKING DRIVERS",
+        "NETWORKING [ETHTOOL]"
+      ],
+      "paths": [
+        "drivers/net/",
+        "include/linux/netdevice.h",
+        "include/linux/ethtool.h"
+      ]
     }
   ]
 }
