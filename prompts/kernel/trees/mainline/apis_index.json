@@ -1045,6 +1045,26 @@
           "vfs_"
         ]
       }
+    },
+    {
+      "file": "workqueue.md",
+      "defining_files": [
+        "include/linux/workqueue.h",
+        "kernel/workqueue.c"
+      ],
+      "symbols": {
+        "exact": [
+          "work_struct",
+          "queue_work",
+          "schedule_work",
+          "flush_work",
+          "cancel_work_sync",
+          "disable_work_sync",
+          "flush_workqueue",
+          "destroy_workqueue"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

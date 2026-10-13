@@ -99,3 +99,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Kernel Tracepoints & `TRACE_EVENT` API | `TRACE_EVENT*`, `TP_fast_assign`, `__string`, `__assign_str`, `CREATE_TRACE_POINTS`, `tracepoint_probe_register`, `tracepoint_synchronize_unregister`, `rv_attach_trace_probe` | `apis/tracing.md` |
 | Serial Core & UART Registration API | `uart_add_one_port`, `uart_remove_one_port`, `uart_ops`, `uart_configure_port`, `uart_change_pm` | `apis/tty.md` |
 | VFS Inode, Dentry & `file_operations` API | `inode_lock_nested`, `I_MUTEX_PARENT`, `lock_rename`, `d_instantiate`, `d_instantiate_new`, `d_add`, `d_unhashed`, `inode_permission`, `replace_fops`, `vfs_*` | `apis/vfs.md` |
+| Workqueue Lifecycle & Teardown API | `work_struct`, `queue_work`, `schedule_work`, `flush_work`, `cancel_work_sync`, `disable_work_sync`, `flush_workqueue`, `destroy_workqueue` | `apis/workqueue.md` |

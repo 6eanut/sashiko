@@ -17,6 +17,5 @@ and symbols regexes.
 
 | Subsystem | Triggers | File |
 |-----------|----------|------|
-| Workqueue | kernel/workqueue.c, work_struct | workqueue.md |
 
 
