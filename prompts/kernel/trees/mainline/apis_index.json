@@ -822,6 +822,39 @@
           "__pm_runtime_"
         ]
       }
+    },
+    {
+      "file": "rcu.md",
+      "defining_files": [
+        "include/linux/rcupdate.h",
+        "include/linux/rculist.h",
+        "include/linux/srcu.h",
+        "kernel/rcu/tree.c"
+      ],
+      "symbols": {
+        "exact": [
+          "rcu_read_lock",
+          "rcu_read_unlock",
+          "rcu_assign_pointer",
+          "rcu_dereference",
+          "synchronize_rcu",
+          "call_rcu",
+          "kfree_rcu",
+          "kfree_rcu_mightsleep",
+          "kvfree_rcu",
+          "kvfree_call_rcu",
+          "rcu_barrier",
+          "list_del_rcu",
+          "hlist_del_rcu",
+          "srcu_read_lock",
+          "srcu_read_unlock",
+          "rcu_read_lock_trace",
+          "rcu_read_unlock_trace"
+        ],
+        "prefixes": [
+          "rcu_"
+        ]
+      }
     }
   ]
 }

@@ -81,3 +81,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Open Firmware (DT) Node & Iterator API | `for_each_child_of_node*`, `for_each_available_child_of_node*`, `of_node_put`, `of_node_get`, `of_parse_phandle`, `of_get_parent`, `of_get_next_parent`, `of_find_*` | `apis/of.md` |
 | PCI Endpoint & IRQ Vector API | `pci_epc_get`, `pci_epf_create`, `pci_epf_destroy`, `pci_alloc_irq_vectors`, `pci_free_irq_vectors`, `pci_enable_msi` | `apis/pci.md` |
 | Power Management & Runtime PM API | `pm_runtime_*`, `__pm_runtime_*`, `rpm_idle`, `rpm_suspend`, `rpm_resume`, `pm_hibernate_is_recovering`, `pm_hibernation_mode_is_suspend`, `pm_sleep_ptr`, `pm_ptr` | `apis/pm.md` |
+| Read-Copy-Update (RCU) API | `rcu_read_lock`, `rcu_assign_pointer`, `rcu_dereference`, `call_rcu`, `synchronize_rcu`, `kfree_rcu`, `kvfree_call_rcu`, `list_del_rcu`, `hlist_del_rcu` | `apis/rcu.md` |
