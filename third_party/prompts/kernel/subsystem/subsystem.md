@@ -27,7 +27,6 @@ and symbols regexes.
 | MM Allocation | `alloc_pages`, `__GFP_*`, `kmalloc`, `kzalloc`, `kmem_cache_*`, `slub`, `vmalloc`, `zone_watermark`, `mempool`, `memblock`, `__get_free_page`, `__get_free_pages`, `get_zeroed_page`, `free_page`, `free_pages`, `ARCH_KMALLOC_MINALIGN`, `KMALLOC_MAX_CACHE_SIZE`, mm/page_alloc.c, mm/slub.c, mm/slab_common.c, mm/vmalloc.c | mm-alloc.md |
 | MM Reclaim/Swap/Migration | `vmscan`, `shrink_*`, `lru_*`, `swap_*`, `shmem_*`, `mem_cgroup_*`, `writeback`, `migrate_*`, mm/vmscan.c, mm/swap_state.c, mm/migrate.c, mm/memcontrol.c | mm-reclaim.md |
 | VFS | inode, dentry, vfs_, fs/*.c | vfs.md |
-| Locking | spin_lock*, mutex_*, rwsem*, seqlock*, *seqcount* | locking.md |
 | Scheduler | kernel/sched/, sched_, schedule, *wakeup* | scheduler.md |
 | Timers | timer_list, timer_setup, mod_timer, del_timer, hrtimer, delayed_work | timers.md |
 | RCU | rcu*, call_rcu, synchronize_rcu, kfree_rcu, kvfree_call_rcu | rcu.md |
