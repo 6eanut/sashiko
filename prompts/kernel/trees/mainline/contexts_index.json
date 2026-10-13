@@ -350,6 +350,18 @@
         "io_kiocb",
         "IORING_"
       ]
+    },
+    {
+      "file": "kconfig.md",
+      "covered_paths": [
+        "Kconfig",
+        "scripts/kconfig/"
+      ],
+      "triggers": [
+        "Kconfig",
+        "depends on ",
+        "COMPILE_TEST"
+      ]
     }
   ]
 }

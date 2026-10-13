@@ -27,6 +27,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | I2C Subsystem | `drivers/i2c/`, `include/linux/i2c.h`, `i2c_client`, `i2c_adapter` | `contexts/i2c.md` |
 | Input Subsystem | `drivers/input/`, `include/linux/input.h`, `input_dev`, `input_handler`, `evdev` | `contexts/input.md` |
 | io_uring | `io_uring/`, `io_uring_`, `io_ring_`, `io_sq_`, `io_cq_`, `io_wq_`, `io_kiocb`, `IORING_` | `contexts/io_uring.md` |
+| Kconfig | `Kconfig`, `config `, `select `, `depends on `, `COMPILE_TEST` | `contexts/kconfig.md` |
 
 ## Kernel API Guides (`apis/`)
 
