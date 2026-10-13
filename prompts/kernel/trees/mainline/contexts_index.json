@@ -124,6 +124,18 @@
         "-funsigned-char",
         "-fno-strict-aliasing"
       ]
+    },
+    {
+      "file": "cxl.md",
+      "covered_paths": [
+        "drivers/cxl/",
+        "drivers/acpi/numa/hmat.c"
+      ],
+      "triggers": [
+        "drivers/cxl/",
+        "cxl_",
+        "hmat_get_extended_linear_cache_size"
+      ]
     }
   ]
 }

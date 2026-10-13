@@ -48,7 +48,6 @@ and symbols regexes.
 | Power Domains | drivers/pmdomain/, pm_genpd_, of_genpd_, exynos_pd_ | pmdomain.md |
 | PM Runtime | include/linux/pm_runtime.h, pm_runtime_, __pm_runtime_, rpm_idle, rpm_suspend, rpm_resume | pm.md |
 | Sysfs | fs/sysfs/, sysfs_create_group, sysfs_update_group, attribute_group, is_visible | sysfs.md |
-| CXL | drivers/cxl/, cxl_, hmat_get_extended_linear_cache_size | cxl.md |
 | TTY/Serial | drivers/tty/, uart_add_one_port, uart_ops, serial_core | tty.md |
 | PCI | drivers/pci/, pci_epc_, pci_epf_, pci_ep_ | pci.md |
 | SMB/ksmbd | fs/smb/server/, ksmbd_, smb_direct_ | smb-ksmbd.md |
