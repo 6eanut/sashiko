@@ -41,6 +41,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | MM Reclaim, Swap & Migration | `mm/vmscan.c`, `mm/swap_state.c`, `mm/migrate.c`, `mm/memcontrol.c`, `shrink_folio_list`, `evict_folios`, `LRU_GEN_MASK`, `dtc_dom`, `TTU_RMAP_LOCKED` | `contexts/mm-reclaim.md` |
 | MM VMA Internals | `mm/vma.c`, `mm/mmap.c`, `mm/mmap_lock.c`, `lock_vma_under_rcu`, `vma_prepare`, `vma_complete`, `vma_modify`, `vma_merge_`, `call_mmap_prepare` | `contexts/mm-vma.md` |
 | Networking Core Packet Flow & XFRM | `net/core/`, `net/xfrm/`, `skb->cb`, `destructor_arg`, `xfrm_state`, `inner_mode`, `virtio_net_hdr`, `PACKET_*` | `contexts/networking-core.md` |
+| NFS Server (NFSD) Subsystem | `fs/nfsd/`, `fs/lockd/`, `fh_verify`, `nfsd4_`, `nfs4_stid`, `nfs4_preprocess_stateid_op`, `nfsd_user_namespace`, `nfserrno` | `contexts/nfsd.md` |
 
 ## Kernel API Guides (`apis/`)
 

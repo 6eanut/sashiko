@@ -173,6 +173,18 @@
         "include/linux/netdevice.h",
         "include/linux/ethtool.h"
       ]
+    },
+    {
+      "file": "nfsd.md",
+      "sections": [
+        "KERNEL NFSD, SUNRPC, AND LOCKD SERVERS",
+        "KERNEL NFSD BLOCK and SCSI LAYOUT DRIVER"
+      ],
+      "paths": [
+        "fs/nfsd/",
+        "fs/lockd/",
+        "include/uapi/linux/nfsd/"
+      ]
     }
   ]
 }

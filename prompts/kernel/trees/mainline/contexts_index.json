@@ -621,6 +621,24 @@
         "PACKET_HOST",
         "PACKET_OTHERHOST"
       ]
+    },
+    {
+      "file": "nfsd.md",
+      "covered_paths": [
+        "fs/nfsd/",
+        "fs/lockd/"
+      ],
+      "triggers": [
+        "fs/nfsd/",
+        "fs/lockd/",
+        "fh_verify",
+        "nfsd4_",
+        "nfs4_stid",
+        "nfs4_preprocess_stateid_op",
+        "nfsd_user_namespace",
+        "release_openowner",
+        "nfserrno"
+      ]
     }
   ]
 }
