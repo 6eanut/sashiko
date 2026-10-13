@@ -44,6 +44,22 @@
         "depth_updated",
         "nr_requests"
       ]
+    },
+    {
+      "file": "bluetooth.md",
+      "covered_paths": [
+        "net/bluetooth/",
+        "include/net/bluetooth/",
+        "drivers/bluetooth/"
+      ],
+      "triggers": [
+        "net/bluetooth/",
+        "hci_",
+        "HCI_LE_ADV",
+        "adv_instances",
+        "cur_adv_instance",
+        "mgmt_pending_"
+      ]
     }
   ]
 }
