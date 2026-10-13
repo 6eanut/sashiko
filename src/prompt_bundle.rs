@@ -414,52 +414,49 @@ mod tests {
             );
         }
 
-        if let Some(maint_json) = PROMPT_BUNDLE_FILES
+        let maint_json = PROMPT_BUNDLE_FILES
             .iter()
             .find(|(p, _)| *p == "kernel/maintainers/index.json")
             .and_then(|(_, bytes)| std::str::from_utf8(bytes).ok())
-        {
-            let maint_index: crate::tree_prompts::MaintainerNotesIndex =
-                serde_json::from_str(maint_json).expect("valid MaintainerNotesIndex JSON");
-            for entry in &maint_index.entries {
-                let expected = format!("kernel/maintainers/{}", entry.file);
-                assert!(
-                    PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
-                    "maintainer note {expected} missing from bundle"
-                );
-            }
+            .expect("kernel/maintainers/index.json must exist in prompt bundle");
+        let maint_index: crate::tree_prompts::MaintainerNotesIndex =
+            serde_json::from_str(maint_json).expect("valid MaintainerNotesIndex JSON");
+        for entry in &maint_index.entries {
+            let expected = format!("kernel/maintainers/{}", entry.file);
+            assert!(
+                PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
+                "maintainer note {expected} missing from bundle"
+            );
         }
 
-        if let Some(contexts_json) = PROMPT_BUNDLE_FILES
+        let contexts_json = PROMPT_BUNDLE_FILES
             .iter()
             .find(|(p, _)| *p == "kernel/trees/mainline/contexts_index.json")
             .and_then(|(_, bytes)| std::str::from_utf8(bytes).ok())
-        {
-            let contexts_index: crate::tree_prompts::CodeContextsIndex =
-                serde_json::from_str(contexts_json).expect("valid CodeContextsIndex JSON");
-            for entry in &contexts_index.entries {
-                let expected = format!("kernel/trees/mainline/contexts/{}", entry.file);
-                assert!(
-                    PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
-                    "code context {expected} missing from bundle"
-                );
-            }
+            .expect("kernel/trees/mainline/contexts_index.json must exist in prompt bundle");
+        let contexts_index: crate::tree_prompts::CodeContextsIndex =
+            serde_json::from_str(contexts_json).expect("valid CodeContextsIndex JSON");
+        for entry in &contexts_index.entries {
+            let expected = format!("kernel/trees/mainline/contexts/{}", entry.file);
+            assert!(
+                PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
+                "code context {expected} missing from bundle"
+            );
         }
 
-        if let Some(apis_json) = PROMPT_BUNDLE_FILES
+        let apis_json = PROMPT_BUNDLE_FILES
             .iter()
             .find(|(p, _)| *p == "kernel/trees/mainline/apis_index.json")
             .and_then(|(_, bytes)| std::str::from_utf8(bytes).ok())
-        {
-            let apis_index: crate::tree_prompts::ApiGuidesIndex =
-                serde_json::from_str(apis_json).expect("valid ApiGuidesIndex JSON");
-            for entry in &apis_index.entries {
-                let expected = format!("kernel/trees/mainline/apis/{}", entry.file);
-                assert!(
-                    PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
-                    "API guide {expected} missing from bundle"
-                );
-            }
+            .expect("kernel/trees/mainline/apis_index.json must exist in prompt bundle");
+        let apis_index: crate::tree_prompts::ApiGuidesIndex =
+            serde_json::from_str(apis_json).expect("valid ApiGuidesIndex JSON");
+        for entry in &apis_index.entries {
+            let expected = format!("kernel/trees/mainline/apis/{}", entry.file);
+            assert!(
+                PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
+                "API guide {expected} missing from bundle"
+            );
         }
     }
 }
