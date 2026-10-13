@@ -11,3 +11,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 
 | API / Header | Triggers (Functions, Macros, Types) | File |
 | :--- | :--- | :--- |
+| Alignment Helpers | `ALIGN`, `ALIGN_DOWN`, `IS_ALIGNED`, `PAGE_ALIGN`, `PAGE_ALIGN_DOWN`, `PAGE_ALIGNED`, `pageblock_align`, `pageblock_aligned`, `pageblock_start_pfn`, `pageblock_end_pfn` | `apis/alignment.md` |

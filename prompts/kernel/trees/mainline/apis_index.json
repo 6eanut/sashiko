@@ -1,3 +1,27 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "file": "alignment.md",
+      "defining_files": [
+        "include/linux/align.h",
+        "include/linux/mm.h",
+        "include/linux/pageblock-flags.h"
+      ],
+      "symbols": {
+        "exact": [
+          "ALIGN",
+          "ALIGN_DOWN",
+          "IS_ALIGNED",
+          "PAGE_ALIGN",
+          "PAGE_ALIGN_DOWN",
+          "PAGE_ALIGNED",
+          "pageblock_align",
+          "pageblock_aligned",
+          "pageblock_start_pfn",
+          "pageblock_end_pfn"
+        ],
+        "prefixes": []
+      }
+    }
+  ]
 }
