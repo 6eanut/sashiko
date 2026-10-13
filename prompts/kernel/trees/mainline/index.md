@@ -29,6 +29,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | io_uring | `io_uring/`, `io_uring_`, `io_ring_`, `io_sq_`, `io_cq_`, `io_wq_`, `io_kiocb`, `IORING_` | `contexts/io_uring.md` |
 | Kconfig | `Kconfig`, `config `, `select `, `depends on `, `COMPILE_TEST` | `contexts/kconfig.md` |
 | Kexec Handover (KHO) | `kernel/liveupdate/`, `kexec_handover`, `kho_` | `contexts/kho.md` |
+| ARM64 KVM (Host / EL1) | `arch/arm64/kvm/`, `vcpu_has_run_once`, `kvm_vcpu_initialized`, `vcpu_sysreg`, `user_mem_abort`, `ICH_HCR_EL2` | `contexts/kvm-arm64.md` |
 
 ## Kernel API Guides (`apis/`)
 

@@ -375,6 +375,21 @@
         "kexec_handover",
         "kho_"
       ]
+    },
+    {
+      "file": "kvm-arm64.md",
+      "covered_paths": [
+        "arch/arm64/kvm/",
+        "arch/arm64/include/asm/kvm_host.h"
+      ],
+      "triggers": [
+        "arch/arm64/kvm/",
+        "vcpu_has_run_once",
+        "kvm_vcpu_initialized",
+        "vcpu_sysreg",
+        "user_mem_abort",
+        "ICH_HCR_EL2"
+      ]
     }
   ]
 }
