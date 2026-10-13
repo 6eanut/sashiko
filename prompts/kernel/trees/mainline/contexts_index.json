@@ -187,6 +187,18 @@
         "#clock-cells",
         "#interrupt-cells"
       ]
+    },
+    {
+      "file": "fscrypt.md",
+      "covered_paths": [
+        "fs/crypto/",
+        "include/linux/fscrypt.h"
+      ],
+      "triggers": [
+        "fs/crypto/",
+        "fscrypt_",
+        "FSCRYPT_"
+      ]
     }
   ]
 }
