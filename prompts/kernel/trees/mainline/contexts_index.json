@@ -213,6 +213,34 @@
         "FUSE_IO_URING",
         "FUSE_OVER_IO_URING"
       ]
+    },
+    {
+      "file": "gic-v3.md",
+      "covered_paths": [
+        "drivers/irqchip/irq-gic-v3",
+        "drivers/irqchip/irq-gic-v4",
+        "arch/arm64/kvm/vgic/",
+        "include/linux/irqchip/arm-gic-v3.h",
+        "include/linux/irqchip/arm-gic-v4.h",
+        "include/kvm/arm_vgic.h"
+      ],
+      "triggers": [
+        "drivers/irqchip/irq-gic-v3",
+        "drivers/irqchip/irq-gic-v4",
+        "vgic-v3",
+        "vgic-v4",
+        "vgic-its",
+        "vgic-mmio",
+        "arm-gic-v3.h",
+        "arm-gic-v4.h",
+        "GICD_",
+        "GICR_",
+        "GITS_",
+        "ICH_LR",
+        "ICC_SGI1R",
+        "its_vpe",
+        "vgic_its"
+      ]
     }
   ]
 }
