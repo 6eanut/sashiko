@@ -748,6 +748,23 @@
         "kvm_arch_has_default_irqchip",
         "devconf_inherit_init_net"
       ]
+    },
+    {
+      "file": "smb-ksmbd.md",
+      "covered_paths": [
+        "fs/smb/smbdirect/",
+        "fs/smb/server/",
+        "fs/smb/client/"
+      ],
+      "triggers": [
+        "fs/smb/smbdirect/",
+        "fs/smb/server/",
+        "smbdirect_",
+        "smb_direct_",
+        "ksmbd_",
+        "refill_work",
+        "immediate_work"
+      ]
     }
   ]
 }

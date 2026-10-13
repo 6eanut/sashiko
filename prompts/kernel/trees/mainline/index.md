@@ -49,6 +49,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Kernel Rust Toolchain & Pin-Init | `rust/`, `*.rs`, `__rust_helper`, `rust_helper_`, `RUST_CONST_HELPER_`, `try_pin_init`, `pin_init`, `build_assert!` | `contexts/rust.md` |
 | Scheduler Internals (EEVDF, RT, DL, `sched_ext`) | `kernel/sched/`, `double_rq_lock`, `__pick_eevdf`, `update_load_avg`, `sched_cpu_dying`, `dl_server_` | `contexts/scheduler.md` |
 | Kernel Selftests (`tools/testing/selftests/`) | `tools/testing/selftests/`, `TEST_PROGS`, `TEST_FILES`, `TEST_GEN_FILES`, `vm_create_with_one_vcpu`, `devconf_inherit_init_net` | `contexts/selftests.md` |
+| SMBDirect (RDMA) & ksmbd | `fs/smb/smbdirect/`, `fs/smb/server/`, `smbdirect_`, `smb_direct_`, `ksmbd_`, `refill_work`, `immediate_work` | `contexts/smb-ksmbd.md` |
 
 ## Kernel API Guides (`apis/`)
 
