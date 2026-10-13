@@ -98,6 +98,18 @@
         "drivers/i2c/",
         "include/linux/i2c.h"
       ]
+    },
+    {
+      "file": "input.md",
+      "sections": [
+        "INPUT (KEYBOARD, MOUSE, JOYSTICK, TOUCHSCREEN) DRIVERS",
+        "INPUT MULTITOUCH (MT) PROTOCOL"
+      ],
+      "paths": [
+        "drivers/input/",
+        "include/linux/input.h",
+        "include/linux/input/"
+      ]
     }
   ]
 }

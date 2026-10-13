@@ -248,6 +248,31 @@
           "i2c_smbus_"
         ]
       }
+    },
+    {
+      "file": "input.md",
+      "defining_files": [
+        "include/linux/input.h",
+        "drivers/input/input.c",
+        "drivers/input/ff-memless.c"
+      ],
+      "symbols": {
+        "exact": [
+          "input_allocate_device",
+          "devm_input_allocate_device",
+          "input_register_device",
+          "input_unregister_device",
+          "input_free_device",
+          "input_device_enabled",
+          "input_event",
+          "input_sync",
+          "input_set_capability",
+          "input_ff_create_memless"
+        ],
+        "prefixes": [
+          "input_report_"
+        ]
+      }
     }
   ]
 }

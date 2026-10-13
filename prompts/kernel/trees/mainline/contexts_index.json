@@ -318,6 +318,20 @@
         "i2c_client",
         "i2c_adapter"
       ]
+    },
+    {
+      "file": "input.md",
+      "covered_paths": [
+        "drivers/input/",
+        "include/linux/input.h",
+        "include/linux/input/"
+      ],
+      "triggers": [
+        "drivers/input/",
+        "input_dev",
+        "input_handler",
+        "evdev"
+      ]
     }
   ]
 }
