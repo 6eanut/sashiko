@@ -95,6 +95,18 @@
         "BPF_TASK_WORK",
         "BPF_UPTR"
       ]
+    },
+    {
+      "file": "btrfs.md",
+      "covered_paths": [
+        "fs/btrfs/"
+      ],
+      "triggers": [
+        "fs/btrfs/",
+        "extent_map",
+        "btrfs_extent_map_block_start",
+        "btrfs_get_dev_zone_info"
+      ]
     }
   ]
 }
