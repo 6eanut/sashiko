@@ -639,6 +639,32 @@
           "mmap_write_lock"
         ]
       }
+    },
+    {
+      "file": "netlink.md",
+      "defining_files": [
+        "include/net/netlink.h",
+        "include/net/genetlink.h",
+        "include/uapi/linux/netlink.h"
+      ],
+      "symbols": {
+        "exact": [
+          "genl_notify",
+          "NLM_F_ECHO",
+          "NLM_F_DUMP_INTR",
+          "NL_SET_BAD_ATTR",
+          "NL_SET_ERR_ATTR_MISS",
+          "NLA_NUL_STRING",
+          "netlink_callback"
+        ],
+        "prefixes": [
+          "genl_",
+          "nla_",
+          "NLA_",
+          "NLM_F_",
+          "nlmsg_"
+        ]
+      }
     }
   ]
 }

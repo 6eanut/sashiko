@@ -148,6 +148,19 @@
         "include/linux/mfd/",
         "Documentation/devicetree/bindings/mfd/"
       ]
+    },
+    {
+      "file": "netlink.md",
+      "sections": [
+        "NETWORKING [GENERAL]"
+      ],
+      "paths": [
+        "Documentation/netlink/specs/",
+        "Documentation/userspace-api/netlink/",
+        "net/netlink/",
+        "include/net/netlink.h",
+        "include/net/genetlink.h"
+      ]
     }
   ]
 }

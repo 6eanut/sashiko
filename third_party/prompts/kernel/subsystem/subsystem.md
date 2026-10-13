@@ -19,7 +19,6 @@ and symbols regexes.
 |-----------|----------|------|
 | Networking Core | net/, skb_, sockets, xfrm, dst_, sock_put, release_sock, pskb_may_pull, SNMP_*_STATS | networking-core.md |
 | Networking Drivers | drivers/net/, ethtool_ops, net_device_ops | networking-drivers.md |
-| Netlink | `genl_`, `nla_`, `NLA_`, `NLM_F_`, `nlmsg_`, `netlink_callback`, Documentation/netlink/specs/, files marked `YNL-GEN` | netlink.md |
 | VFS | inode, dentry, vfs_, fs/*.c | vfs.md |
 | Scheduler | kernel/sched/, sched_, schedule, *wakeup* | scheduler.md |
 | Timers | timer_list, timer_setup, mod_timer, del_timer, hrtimer, delayed_work | timers.md |
