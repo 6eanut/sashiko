@@ -210,6 +210,22 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "hwmon.md",
+      "defining_files": [
+        "include/linux/hwmon.h",
+        "drivers/hwmon/hwmon.c"
+      ],
+      "symbols": {
+        "exact": [
+          "hwmon_device_register_with_info",
+          "devm_hwmon_device_register_with_info",
+          "hwmon_lock",
+          "hwmon_unlock"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

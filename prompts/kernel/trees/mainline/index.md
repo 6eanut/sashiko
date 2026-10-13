@@ -37,3 +37,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | DRM, Overflow & fwnode APIs | `struct_size`, `fwnode_create_software_node`, `stack_depot_save`, `xe_device_get_gt`, `msm_context_vm`, `amdgpu_bo_create_kernel`, `intel_cx0_rmw` | `apis/drm.md` |
 | GPIO Consumer & Driver API | `linux/gpio.h`, `gpio_get_value`, `gpio_set_value`, `gpiod_get_raw_value`, `gpiod_set_raw_value`, `gpio_chip`, `GPIO_GENERIC`, `GPIO_REGMAP` | `apis/gpio.md` |
 | HID Transport & Driver API | `hid_allocate_device`, `hid_add_device`, `hid_destroy_device`, `hid_parse`, `hid_hw_start`, `hid_hw_stop`, `hid_device_io_start`, `hid_safe_input_report`, `hid_is_usb` | `apis/hid.md` |
+| Hardware Monitoring API | `hwmon_device_register_with_info`, `devm_hwmon_device_register_with_info`, `hwmon_lock`, `hwmon_unlock` | `apis/hwmon.md` |

@@ -76,6 +76,17 @@
         "include/linux/gpio/",
         "include/linux/gpio.h"
       ]
+    },
+    {
+      "file": "hwmon.md",
+      "sections": [
+        "HARDWARE MONITORING"
+      ],
+      "paths": [
+        "drivers/hwmon/",
+        "include/linux/hwmon.h",
+        "Documentation/hwmon/"
+      ]
     }
   ]
 }
