@@ -54,7 +54,6 @@ and symbols regexes.
 | Selftests | tools/testing/selftests/, TEST_PROGS, TEST_FILES, TEST_GEN_FILES | selftests.md |
 | USB Storage | drivers/usb/storage/, unusual_devs.h, UNUSUAL_DEV, USB_SC_, USB_PR_ | usb-storage.md |
 | Objtool | tools/objtool/, INSN_BUG, INSN_TRAP, decode.c | objtool.md |
-| KHO (Kexec Handover) | lib/test_kho.c, kho_, kho_is_enabled, kho_retrieve_subtree, kho_preserve_folio, kho_add_subtree, register_kho_notifier | kho.md |
 | Rust | any Rust code | rust.md |
 | KVM | virt/kvm/, include/linux/kvm*, kvm_ | kvm.md |
 | ARM64 KVM (EL1/Host) | arch/arm64/kvm/ | kvm-arm64.md |

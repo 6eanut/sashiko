@@ -28,6 +28,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Input Subsystem | `drivers/input/`, `include/linux/input.h`, `input_dev`, `input_handler`, `evdev` | `contexts/input.md` |
 | io_uring | `io_uring/`, `io_uring_`, `io_ring_`, `io_sq_`, `io_cq_`, `io_wq_`, `io_kiocb`, `IORING_` | `contexts/io_uring.md` |
 | Kconfig | `Kconfig`, `config `, `select `, `depends on `, `COMPILE_TEST` | `contexts/kconfig.md` |
+| Kexec Handover (KHO) | `kernel/liveupdate/`, `kexec_handover`, `kho_` | `contexts/kho.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -46,3 +47,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | I2C Transfer & DMA API | `i2c_transfer`, `i2c_master_send`, `i2c_master_recv`, `i2c_master_send_dmasafe`, `i2c_master_recv_dmasafe`, `I2C_M_DMA_SAFE`, `i2c_smbus_*`, `i2c_get_dma_safe_msg_buf`, `i2c_put_dma_safe_msg_buf` | `apis/i2c.md` |
 | Input Device & FF API | `input_allocate_device`, `devm_input_allocate_device`, `input_register_device`, `input_free_device`, `input_device_enabled`, `input_report_*`, `input_sync`, `input_ff_create_memless` | `apis/input.md` |
 | MMIO Stream & Register Accessors | `writesl`, `readsl`, `writesw`, `readsw`, `writesb`, `readsb`, `__raw_writel`, `__raw_readl` | `apis/io-accessors.md` |
+| Kexec Handover (KHO) API | `kho_is_enabled`, `is_kho_boot`, `kho_add_subtree`, `kho_remove_subtree`, `kho_retrieve_subtree`, `kho_preserve_folio`, `kho_preserve_pages`, `kho_alloc_preserve` | `apis/kho.md` |

@@ -362,6 +362,19 @@
         "depends on ",
         "COMPILE_TEST"
       ]
+    },
+    {
+      "file": "kho.md",
+      "covered_paths": [
+        "kernel/liveupdate/",
+        "include/linux/kexec_handover.h",
+        "lib/test_kho.c"
+      ],
+      "triggers": [
+        "kernel/liveupdate/",
+        "kexec_handover",
+        "kho_"
+      ]
     }
   ]
 }
