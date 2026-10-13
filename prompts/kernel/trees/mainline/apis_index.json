@@ -347,6 +347,27 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "leds.md",
+      "defining_files": [
+        "include/linux/leds.h",
+        "drivers/leds/led-class.c",
+        "drivers/leds/led-triggers.c"
+      ],
+      "symbols": {
+        "exact": [
+          "led_classdev_register",
+          "led_classdev_register_ext",
+          "led_classdev_unregister",
+          "devm_led_classdev_register",
+          "devm_led_classdev_register_ext",
+          "led_trigger_register",
+          "led_trigger_unregister",
+          "devm_led_trigger_register"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

@@ -126,6 +126,17 @@
         "include/linux/kvm_host.h",
         "include/uapi/linux/kvm.h"
       ]
+    },
+    {
+      "file": "leds.md",
+      "sections": [
+        "LED SUBSYSTEM"
+      ],
+      "paths": [
+        "drivers/leds/",
+        "include/linux/leds.h",
+        "Documentation/devicetree/bindings/leds/"
+      ]
     }
   ]
 }

@@ -51,3 +51,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | MMIO Stream & Register Accessors | `writesl`, `readsl`, `writesw`, `readsw`, `writesb`, `readsb`, `__raw_writel`, `__raw_readl` | `apis/io-accessors.md` |
 | Kexec Handover (KHO) API | `kho_is_enabled`, `is_kho_boot`, `kho_add_subtree`, `kho_remove_subtree`, `kho_retrieve_subtree`, `kho_preserve_folio`, `kho_preserve_pages`, `kho_alloc_preserve` | `apis/kho.md` |
 | KVM Core Helpers | `gfn_to_hva`, `gfn_to_hva_memslot`, `gfn_to_hva_memslot_prot`, `kvm_vcpu_memslots`, `vcpu_load`, `vcpu_put`, `kvm_make_request`, `kvm_check_request` | `apis/kvm.md` |
+| LED Class & Trigger API | `led_classdev_register`, `led_classdev_unregister`, `devm_led_classdev_register`, `devm_led_classdev_register_ext`, `led_trigger_register`, `devm_led_trigger_register` | `apis/leds.md` |
