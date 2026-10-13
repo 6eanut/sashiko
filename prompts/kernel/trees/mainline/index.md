@@ -21,6 +21,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Filesystem Encryption (fscrypt) | `fs/crypto/`, `fscrypt_`, `FSCRYPT_` | `contexts/fscrypt.md` |
 | FUSE | `fs/fuse/`, `fuse_uring_`, `fuse_chan_`, `fuse_dev_`, `FUSE_IO_URING` | `contexts/fuse.md` |
 | ARM GICv3 / GICv4 & vGIC | `drivers/irqchip/irq-gic-v3*`, `drivers/irqchip/irq-gic-v4*`, `arch/arm64/kvm/vgic/`, `GICD_`, `GICR_`, `GITS_`, `ICH_LR` | `contexts/gic-v3.md` |
+| ARM GICv5 & vGICv5 | `drivers/irqchip/irq-gic-v5*`, `vgic-v5`, `arm-gic-v5.h`, `gicv5_`, `GICV5_`, `ICC_PPI_`, `gsb_sys`, `gsb_ack` | `contexts/gic-v5.md` |
 
 ## Kernel API Guides (`apis/`)
 
