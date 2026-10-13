@@ -45,6 +45,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Objtool Control-Flow Validation | `tools/objtool/`, `INSN_BUG`, `INSN_TRAP`, `decode.c`, `validate_sls`, `ignore_unreachable_insn` | `contexts/objtool.md` |
 | Open Firmware (DT) Core & MSI | `drivers/of/`, `of_msi_xlate`, `of_msi_get_domain`, `msi-map`, `msi-parent` | `contexts/of.md` |
 | Perf Tools (`tools/perf/`) | `tools/perf/`, `perf_tool`, `perf_env`, `DECLARE_RC_STRUCT`, `thread__get`, `maps__get`, `fdopendir` | `contexts/perf.md` |
+| Generic Power Domains (`genpd`) | `drivers/pmdomain/`, `pm_genpd_`, `of_genpd_`, `GENPD_FLAG_NO_STAY_ON`, `exynos_pd_` | `contexts/pmdomain.md` |
 
 ## Kernel API Guides (`apis/`)
 

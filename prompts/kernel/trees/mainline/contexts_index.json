@@ -684,6 +684,21 @@
         "dso__get",
         "fdopendir"
       ]
+    },
+    {
+      "file": "pmdomain.md",
+      "covered_paths": [
+        "drivers/pmdomain/",
+        "include/linux/pm_domain.h"
+      ],
+      "triggers": [
+        "drivers/pmdomain/",
+        "pm_genpd_",
+        "of_genpd_",
+        "GENPD_FLAG_NO_STAY_ON",
+        "genpd_power_off",
+        "exynos_pd_"
+      ]
     }
   ]
 }
