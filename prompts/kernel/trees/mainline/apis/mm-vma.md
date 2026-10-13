@@ -28,3 +28,24 @@
 - **Memfd file creation (`memfd_alloc_file()`):** Use `memfd_alloc_file()` to create memfd files rather than calling `shmem_file_setup()` or `hugetlb_file_setup()` directly, which omits `O_LARGEFILE`, `fmode` flags, and LSM security initialization.
 - **Committed memory accounting (`security_vm_enough_memory_mm()`):** On success (`0`), `security_vm_enough_memory_mm()` increments `vm_committed_as` via `vm_acct_memory()`. Every subsequent error path must call `vm_unacct_memory(pages)` to avoid leaking committed memory under `vm.overcommit_memory=2`.
 - **`(void *)bool` in page-walk callbacks:** Casting a C `bool` (`_Bool`) to `void *` (e.g., `walk_page_range_vma(..., (void *)lock)`) does not trigger `-Wint-to-pointer-cast` in GCC or Clang.
+
+## VMA Lifecycle, Concurrency, and Review Invariants
+
+- **Reference Counting:** VMAs are managed by the `mm_struct` VMA tree. If a driver attaches private data, it must implement `vm_ops->open()` and `vm_ops->close()`. The `close()` callback is the only safe place to release VMA-associated resources.
+- **Atomic Context:** `mmap_lock` and per-VMA locks are sleeping locks. Never acquire them in hard IRQ, soft IRQ, or with `preempt_disable()`.
+- **Retry Logic:** If a lock is dropped and reacquired (e.g., in a fault handler), the VMA pointer must be re-validated, as the VMA may have been freed or replaced.
+- **Boundary Validation:** Always validate that requested offsets and lengths fit within `vma->vm_start` and `vma->vm_end`. Do not assume the VMA spans the entire backing object.
+- **Cache Coherency:** Ensure `pgprot_t` matches the cache requirements of the physical memory (e.g., avoid mapping `UC` if the direct map is `WB`).
+- **Locking Order:** Always acquire `mmap_lock` before per-VMA locks. Never hold a spinlock while calling functions that may sleep (e.g., `vmalloc`, `memfd_alloc_file`).
+- **State Invariants:** After any VMA split or merge, verify that `vm_pgoff` and `vm_start` remain consistent with the backing object's offset.
+- **Error Path Cleanup:** Ensure all `vm_acct_memory()` calls are balanced by `vm_unacct_memory()` on failure. Use `goto` labels to centralize cleanup and prevent resource leaks.
+- **Pointer Validation:** Always check for `NULL` on `vma->vm_ops` before dereferencing, especially in generic fault handlers that may encounter anonymous VMAs.
+- **Memory Ordering:** When publishing a VMA to the `mm_struct` tree, ensure all initialization is visible via appropriate memory barriers.
+- **VMA Splitting:** When a VMA is split, the `vm_ops->open()` callback is invoked for the new VMA. Ensure that private data structures are correctly duplicated or reference-counted to prevent double-free scenarios during `munmap`.
+- **Fault Handler Safety:** Fault handlers must not assume the VMA remains valid after dropping the `mmap_lock` or per-VMA lock. Always re-lookup the VMA using `find_vma()` or equivalent after re-acquiring locks.
+- **Alignment Constraints:** Ensure that `vm_pgoff` and `vm_start` are page-aligned. Misaligned mappings can lead to architecture-specific faults or undefined behavior in page-table population.
+- **Security:** Always validate user-provided flags and offsets against the VMA's `vm_flags` and the backing object's size to prevent privilege escalation or out-of-bounds access.
+- **Object Ownership:** When a lookup yields a VMA, the caller does not own a reference; the VMA is protected by the `mmap_lock` or per-VMA lock. If the lock is dropped, the VMA pointer is invalid.
+- **Asynchronous Handoff:** Never pass a VMA pointer to an asynchronous worker without duplicating the reference or ensuring the `mm_struct` remains active via `mmgrab()` / `mmget()`.
+- **Error Signaling:** Functions like `vmalloc_noprof()` return `NULL` on failure; always check for `NULL` before dereferencing. Use `ERR_PTR` conventions for file-based helpers like `memfd_alloc_file()`.
+- **Idempotency:** Ensure that state transitions (e.g., `mremap` with `MREMAP_DONTUNMAP`) are idempotent and do not double-account resources or leave the VMA in an inconsistent state.

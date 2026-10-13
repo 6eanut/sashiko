@@ -2,10 +2,10 @@
 
 ## Generic Alignment (`include/linux/align.h`)
 
-- `ALIGN(x, a)` rounds `x` **up** to the first `a` boundary at or after `x`. If `x` is already aligned, the result remains `x` (it does not advance to the next boundary).
+- `ALIGN(x, a)` rounds `x` **up** to the first `a` boundary at or after `x`. If `x` is already aligned, the result remains `x`.
 - `ALIGN_DOWN(x, a)` rounds `x` **down** to the containing `a` boundary.
 - `IS_ALIGNED(x, a)` tests whether `x` is a multiple of `a`.
-- The alignment argument `a` must be a power of two.
+- **Constraint:** The alignment argument `a` must be a power of two.
 
 ## Page Alignment (`include/linux/mm.h`)
 
@@ -28,17 +28,28 @@
 
 - `pageblock_start_pfn(pfn)` returns the **inclusive** start PFN of the pageblock containing `pfn`.
 - `pageblock_end_pfn(pfn)` returns the **exclusive** end PFN of the pageblock containing `pfn` (the start of the next pageblock).
-- `pageblock_align(pfn)` rounds upward to the first pageblock boundary at or after `pfn`. For an unaligned `pfn`, `pageblock_align(pfn)` equals `pageblock_end_pfn(pfn)`, NOT `pageblock_start_pfn(pfn)`:
+- `pageblock_align(pfn)` rounds upward to the first pageblock boundary at or after `pfn`. For an unaligned `pfn`, `pageblock_align(pfn)` equals `pageblock_end_pfn(pfn)`, NOT `pageblock_start_pfn(pfn)`.
 
 | PFN (`pageblock_nr_pages == 512`) | `pageblock_start_pfn()` | `pageblock_align()` | `pageblock_end_pfn()` |
 |---|---|---|---|
 | 512 | 512 | 512 | 1024 |
 | 513 | 512 | 1024 | 1024 |
 
-**Report as bugs:**
-- Passing PFNs to `PAGE_ALIGN*` or byte addresses to `pageblock_*`.
-- Treating `pageblock_end_pfn(pfn)` as inclusive.
-- Using `pageblock_align(pfn)` when the containing pageblock's start (`pageblock_start_pfn(pfn)`) is intended.
+## Review Invariants & Bug Patterns
+
+### Critical Review Invariants
+1. **Unit Mismatch:** Passing a PFN to `PAGE_ALIGN*` or a byte address to `pageblock_*` is a logic error.
+2. **Integer Overflow:** When calculating `ALIGN(x, a)`, ensure `x + (a - 1)` does not overflow the type width, especially for user-controlled inputs.
+3. **Exclusive Boundaries:** Always treat `pageblock_end_pfn(pfn)` as an exclusive boundary.
+4. **Redundant Arithmetic:** Avoid manual pointer arithmetic if the logic already accounts for alignment; this prevents "double-alignment" bugs.
+5. **Architecture-Specific Alignment:** Ensure DMA buffers and network headers use `ALIGN()` to satisfy hardware-specific alignment requirements to prevent alignment faults.
+
+### Bug Prevention Checklist
+- [ ] **Is the alignment `a` a power of two?**
+- [ ] **Are you using the correct unit?** (Bytes for `PAGE_ALIGN`, PFNs for `pageblock_align`).
+- [ ] **Is the calculation overflow-safe?**
+- [ ] **Are you treating `pageblock_end_pfn` as exclusive?**
+- [ ] **Are you using `pageblock_start_pfn` when you need the block's base?**
 
 ## Allocator Alignment
 
