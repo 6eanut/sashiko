@@ -731,6 +731,23 @@
         "sched_cpu_dying",
         "dl_server_"
       ]
+    },
+    {
+      "file": "selftests.md",
+      "covered_paths": [
+        "tools/testing/selftests/"
+      ],
+      "triggers": [
+        "tools/testing/selftests/",
+        "TEST_PROGS",
+        "TEST_FILES",
+        "TEST_GEN_PROGS",
+        "TEST_GEN_FILES",
+        "kselftest",
+        "vm_create_with_one_vcpu",
+        "kvm_arch_has_default_irqchip",
+        "devconf_inherit_init_net"
+      ]
     }
   ]
 }

@@ -48,6 +48,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Generic Power Domains (`genpd`) | `drivers/pmdomain/`, `pm_genpd_`, `of_genpd_`, `GENPD_FLAG_NO_STAY_ON`, `exynos_pd_` | `contexts/pmdomain.md` |
 | Kernel Rust Toolchain & Pin-Init | `rust/`, `*.rs`, `__rust_helper`, `rust_helper_`, `RUST_CONST_HELPER_`, `try_pin_init`, `pin_init`, `build_assert!` | `contexts/rust.md` |
 | Scheduler Internals (EEVDF, RT, DL, `sched_ext`) | `kernel/sched/`, `double_rq_lock`, `__pick_eevdf`, `update_load_avg`, `sched_cpu_dying`, `dl_server_` | `contexts/scheduler.md` |
+| Kernel Selftests (`tools/testing/selftests/`) | `tools/testing/selftests/`, `TEST_PROGS`, `TEST_FILES`, `TEST_GEN_FILES`, `vm_create_with_one_vcpu`, `devconf_inherit_init_net` | `contexts/selftests.md` |
 
 ## Kernel API Guides (`apis/`)
 

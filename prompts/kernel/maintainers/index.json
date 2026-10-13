@@ -221,6 +221,15 @@
         "rust/",
         "Documentation/rust/"
       ]
+    },
+    {
+      "file": "selftests.md",
+      "sections": [
+        "KERNEL SELFTEST FRAMEWORK"
+      ],
+      "paths": [
+        "tools/testing/selftests/"
+      ]
     }
   ]
 }
