@@ -199,6 +199,20 @@
         "fscrypt_",
         "FSCRYPT_"
       ]
+    },
+    {
+      "file": "fuse.md",
+      "covered_paths": [
+        "fs/fuse/"
+      ],
+      "triggers": [
+        "fs/fuse/",
+        "fuse_uring_",
+        "fuse_chan_",
+        "fuse_dev_",
+        "FUSE_IO_URING",
+        "FUSE_OVER_IO_URING"
+      ]
     }
   ]
 }

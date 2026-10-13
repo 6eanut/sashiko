@@ -19,6 +19,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | DRM / GPU | `drivers/gpu/drm/`, `include/drm/`, `drm_atomic_`, `drm_gpuvm`, `amdgpu_`, `hwseq`, `xe_pm_`, `intel_cx0_` | `contexts/drm.md` |
 | Device Tree Bindings | `Documentation/devicetree/bindings/`, `$id: http://devicetree.org/schemas/` | `contexts/dt-bindings.md` |
 | Filesystem Encryption (fscrypt) | `fs/crypto/`, `fscrypt_`, `FSCRYPT_` | `contexts/fscrypt.md` |
+| FUSE | `fs/fuse/`, `fuse_uring_`, `fuse_chan_`, `fuse_dev_`, `FUSE_IO_URING` | `contexts/fuse.md` |
 
 ## Kernel API Guides (`apis/`)
 
