@@ -230,6 +230,11 @@
       "paths": [
         "tools/testing/selftests/"
       ]
+    },
+    {
+      "file": "subjective-review.md",
+      "sections": [],
+      "paths": []
     }
   ]
 }

@@ -28,8 +28,3 @@ and symbols regexes.
 | Wireless/mac80211 | drivers/net/wireless/, net/mac80211/, BSS_CHANGED_, vif_cfg_changed, link_info_changed, bss_info_changed | wireless.md |
 | USB Storage | drivers/usb/storage/, unusual_devs.h, UNUSUAL_DEV, USB_SC_, USB_PR_ | usb-storage.md |
 
-## Optional Patterns
-
-Load only when explicitly requested in the prompt:
-
-- **Subjective Review** (subjective-review.md): Subjective general assessment
