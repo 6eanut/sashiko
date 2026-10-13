@@ -60,6 +60,22 @@
         "cur_adv_instance",
         "mgmt_pending_"
       ]
+    },
+    {
+      "file": "bpf.md",
+      "covered_paths": [
+        "kernel/bpf/",
+        "net/core/filter.c",
+        "include/linux/bpf.h",
+        "include/linux/btf.h"
+      ],
+      "triggers": [
+        "kernel/bpf/",
+        "__bpf_kfunc",
+        "BTF_KFUNCS",
+        "check_kfunc_args",
+        "verifier"
+      ]
     }
   ]
 }

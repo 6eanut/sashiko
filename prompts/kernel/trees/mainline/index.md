@@ -10,6 +10,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | ATA / libata | `drivers/ata/`, `ata_dev_`, `ata_port_`, `ata_read_log_`, `ATA_QUIRK_` | `contexts/ata.md` |
 | Block Layer | `block/`, `drivers/nvme/`, `blk_mq_`, `elevator_mq_ops`, `depth_updated` | `contexts/block.md` |
 | Bluetooth | `net/bluetooth/`, `hci_`, `HCI_LE_ADV`, `adv_instances`, `cur_adv_instance`, `mgmt_pending_` | `contexts/bluetooth.md` |
+| BPF Verifier & Kfuncs | `kernel/bpf/`, `__bpf_kfunc`, `BTF_KFUNCS`, `check_kfunc_args` | `contexts/bpf.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -18,3 +19,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Alignment Helpers | `ALIGN`, `ALIGN_DOWN`, `IS_ALIGNED`, `PAGE_ALIGN`, `PAGE_ALIGN_DOWN`, `PAGE_ALIGNED`, `pageblock_align`, `pageblock_aligned`, `pageblock_start_pfn`, `pageblock_end_pfn` | `apis/alignment.md` |
 | Block & Bio API | `blk_mq_freeze_queue`, `bio_has_data`, `op_is_write`, `bio_alloc_bioset`, `bio_integrity_prep`, `bio_kmalloc` | `apis/block.md` |
 | Boot & Module Parameters | `__setup`, `early_param`, `module_param`, `module_param_named`, `core_param` | `apis/boot-params.md` |
+| BPF Kfuncs & Skeletons | `__bpf_kfunc`, `BTF_KFUNCS_*`, `bpf_program__fd`, `bpf_map__fd`, `__open_and_load` | `apis/bpf.md` |

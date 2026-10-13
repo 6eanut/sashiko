@@ -20,6 +20,21 @@
         "include/linux/moduleparam.h",
         "include/linux/init.h"
       ]
+    },
+    {
+      "file": "bpf.md",
+      "sections": [
+        "BPF [GENERAL] (Safe Dynamic Programs and Tools)",
+        "BPF [CORE]",
+        "BPF [SELFTESTS] (Test Runners & Infrastructure)"
+      ],
+      "paths": [
+        "kernel/bpf/",
+        "net/core/filter.c",
+        "include/linux/bpf",
+        "tools/lib/bpf/",
+        "tools/testing/selftests/bpf/"
+      ]
     }
   ]
 }

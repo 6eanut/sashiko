@@ -67,6 +67,26 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "bpf.md",
+      "defining_files": [
+        "include/linux/btf.h",
+        "tools/lib/bpf/libbpf.h",
+        "tools/testing/selftests/bpf/test_progs.h"
+      ],
+      "symbols": {
+        "exact": [
+          "__bpf_kfunc",
+          "bpf_program__fd",
+          "bpf_map__fd",
+          "bpf_object__find_program_by_name",
+          "bpf_object__find_map_by_name"
+        ],
+        "prefixes": [
+          "BTF_KFUNCS_"
+        ]
+      }
     }
   ]
 }
