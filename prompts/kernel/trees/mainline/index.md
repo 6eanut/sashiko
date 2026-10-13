@@ -32,6 +32,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | ARM64 KVM (Host / EL1) | `arch/arm64/kvm/`, `vcpu_has_run_once`, `kvm_vcpu_initialized`, `vcpu_sysreg`, `user_mem_abort`, `ICH_HCR_EL2` | `contexts/kvm-arm64.md` |
 | KVM Core & x86 MMU | `virt/kvm/`, `arch/x86/kvm/`, `kvm_mmu_`, `is_page_fault_stale`, `mmu_invalidate_seq`, `gfn_to_pfn_cache`, `slots_lock` | `contexts/kvm.md` |
 | libbpf Public API | `tools/lib/bpf/`, `LIBBPF_API`, `libbpf_err`, `libbpf_err_ptr`, `libbpf_ptr` | `contexts/libbpf.md` |
+| Media / V4L2 Subdevice Core | `drivers/media/`, `include/media/`, `v4l2_subdev_`, `V4L2_SUBDEV_`, `MEDIA_BUS_FMT_` | `contexts/media.md` |
 
 ## Kernel API Guides (`apis/`)
 

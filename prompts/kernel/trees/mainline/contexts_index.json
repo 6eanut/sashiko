@@ -420,6 +420,20 @@
         "libbpf_err_ptr",
         "libbpf_ptr"
       ]
+    },
+    {
+      "file": "media.md",
+      "covered_paths": [
+        "drivers/media/",
+        "include/media/"
+      ],
+      "triggers": [
+        "drivers/media/",
+        "include/media/",
+        "v4l2_subdev_",
+        "V4L2_SUBDEV_",
+        "MEDIA_BUS_FMT_"
+      ]
     }
   ]
 }
