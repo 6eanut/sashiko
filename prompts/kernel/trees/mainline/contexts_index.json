@@ -765,6 +765,24 @@
         "refill_work",
         "immediate_work"
       ]
+    },
+    {
+      "file": "sunrpc.md",
+      "covered_paths": [
+        "net/sunrpc/",
+        "include/linux/sunrpc/"
+      ],
+      "triggers": [
+        "net/sunrpc/",
+        "svc_xprt_",
+        "svc_rqst",
+        "rpc_task",
+        "rpc_clnt",
+        "xprtrdma",
+        "rpcrdma_",
+        "svc_rdma_",
+        "gss_svc_"
+      ]
     }
   ]
 }

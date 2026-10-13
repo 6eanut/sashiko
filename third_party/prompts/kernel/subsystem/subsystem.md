@@ -22,7 +22,6 @@ and symbols regexes.
 | Tracing | trace_, tracepoints | tracing.md |
 | Workqueue | kernel/workqueue.c, work_struct | workqueue.md |
 | Syscalls | `SYSCALL_DEFINE`, `copy_from_user`, `copy_to_user`, `get_user`, `put_user`, any change to syscall parameter validation | syscall.md |
-| SunRPC | net/sunrpc/* | sunrpc.md |
 | Sysfs | fs/sysfs/, sysfs_create_group, sysfs_update_group, attribute_group, is_visible | sysfs.md |
 | TTY/Serial | drivers/tty/, uart_add_one_port, uart_ops, serial_core | tty.md |
 | Wireless/mac80211 | drivers/net/wireless/, net/mac80211/, BSS_CHANGED_, vif_cfg_changed, link_info_changed, bss_info_changed | wireless.md |
