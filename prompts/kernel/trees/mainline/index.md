@@ -91,3 +91,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Task State, Wakeup & Migration API | `set_current_state`, `schedule`, `wake_up_process`, `try_to_wake_up`, `migrate_disable`, `set_cpus_allowed_ptr`, `kthread_bind` | `apis/scheduler.md` |
 | Syscall Parameter Validation & User Copy API | `SYSCALL_DEFINE*`, `copy_from_user`, `copy_to_user`, `copy_struct_from_user`, `get_user`, `put_user` | `apis/syscall.md` |
 | Sysfs Group & Kobject Lifecycle API | `sysfs_create_group`, `sysfs_update_group`, `attribute_group`, `is_visible`, `is_bin_visible`, `SYSFS_GROUP_INVISIBLE`, `kobject_create_and_add`, `kobject_put` | `apis/sysfs.md` |
+| Kernel Timers (`timer_list`, `hrtimer`, `delayed_work`) | `timer_setup`, `mod_timer`, `timer_delete_sync`, `timer_shutdown_sync`, `hrtimer_setup`, `hrtimer_cancel`, `delayed_work`, `cancel_delayed_work_sync` | `apis/timers.md` |

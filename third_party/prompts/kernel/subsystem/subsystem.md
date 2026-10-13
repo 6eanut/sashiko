@@ -18,7 +18,6 @@ and symbols regexes.
 | Subsystem | Triggers | File |
 |-----------|----------|------|
 | VFS | inode, dentry, vfs_, fs/*.c | vfs.md |
-| Timers | timer_list, timer_setup, mod_timer, del_timer, hrtimer, delayed_work | timers.md |
 | Tracing | trace_, tracepoints | tracing.md |
 | Workqueue | kernel/workqueue.c, work_struct | workqueue.md |
 | TTY/Serial | drivers/tty/, uart_add_one_port, uart_ops, serial_core | tty.md |
