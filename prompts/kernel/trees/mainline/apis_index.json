@@ -898,6 +898,29 @@
           "SYSCALL_DEFINE"
         ]
       }
+    },
+    {
+      "file": "sysfs.md",
+      "defining_files": [
+        "include/linux/sysfs.h",
+        "include/linux/kobject.h",
+        "fs/sysfs/group.c"
+      ],
+      "symbols": {
+        "exact": [
+          "sysfs_create_group",
+          "sysfs_update_group",
+          "attribute_group",
+          "is_visible",
+          "is_bin_visible",
+          "SYSFS_GROUP_INVISIBLE",
+          "kobject_create_and_add",
+          "kobject_put"
+        ],
+        "prefixes": [
+          "sysfs_"
+        ]
+      }
     }
   ]
 }

@@ -51,6 +51,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Kernel Selftests (`tools/testing/selftests/`) | `tools/testing/selftests/`, `TEST_PROGS`, `TEST_FILES`, `TEST_GEN_FILES`, `vm_create_with_one_vcpu`, `devconf_inherit_init_net` | `contexts/selftests.md` |
 | SMBDirect (RDMA) & ksmbd | `fs/smb/smbdirect/`, `fs/smb/server/`, `smbdirect_`, `smb_direct_`, `ksmbd_`, `refill_work`, `immediate_work` | `contexts/smb-ksmbd.md` |
 | SunRPC Transport & GSS (`net/sunrpc/`) | `net/sunrpc/`, `svc_xprt_`, `svc_rqst`, `rpc_task`, `xprtrdma`, `rpcrdma_`, `svc_rdma_`, `gss_svc_` | `contexts/sunrpc.md` |
+| Sysfs Attribute Groups (`fs/sysfs/`) | `fs/sysfs/`, `sysfs_group_attrs_change_owner`, `kernfs_find_and_get`, `SYSFS_GROUP_INVISIBLE` | `contexts/sysfs.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -89,3 +90,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Read-Copy-Update (RCU) API | `rcu_read_lock`, `rcu_assign_pointer`, `rcu_dereference`, `call_rcu`, `synchronize_rcu`, `kfree_rcu`, `kvfree_call_rcu`, `list_del_rcu`, `hlist_del_rcu` | `apis/rcu.md` |
 | Task State, Wakeup & Migration API | `set_current_state`, `schedule`, `wake_up_process`, `try_to_wake_up`, `migrate_disable`, `set_cpus_allowed_ptr`, `kthread_bind` | `apis/scheduler.md` |
 | Syscall Parameter Validation & User Copy API | `SYSCALL_DEFINE*`, `copy_from_user`, `copy_to_user`, `copy_struct_from_user`, `get_user`, `put_user` | `apis/syscall.md` |
+| Sysfs Group & Kobject Lifecycle API | `sysfs_create_group`, `sysfs_update_group`, `attribute_group`, `is_visible`, `is_bin_visible`, `SYSFS_GROUP_INVISIBLE`, `kobject_create_and_add`, `kobject_put` | `apis/sysfs.md` |

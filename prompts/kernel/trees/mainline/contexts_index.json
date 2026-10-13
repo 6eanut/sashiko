@@ -783,6 +783,19 @@
         "svc_rdma_",
         "gss_svc_"
       ]
+    },
+    {
+      "file": "sysfs.md",
+      "covered_paths": [
+        "fs/sysfs/"
+      ],
+      "triggers": [
+        "fs/sysfs/",
+        "sysfs_group_attrs_change_owner",
+        "sysfs_groups_change_owner",
+        "kernfs_find_and_get",
+        "SYSFS_GROUP_INVISIBLE"
+      ]
     }
   ]
 }
