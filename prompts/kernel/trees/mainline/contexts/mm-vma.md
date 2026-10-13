@@ -33,3 +33,16 @@ The VMA slab cache is created with `SLAB_TYPESAFE_BY_RCU` (`vma_state_init()` in
 
 - **`check_stable_address_space(mm)`:** Needed when walking an external `mm`'s maple tree from the global `mmlist` (e.g., `unuse_mm()` in `mm/swapfile.c`) where a failed `dup_mmap()` may leave `XA_ZERO_ENTRY` markers and `MMF_UNSTABLE`. Not needed when a subsystem walks its own list of established mappings (such as `kernel/bpf/arena.c:zap_pages()`).
 - **`MM_STRUCT_FLEXIBLE_ARRAY_INIT`:** `struct mm_struct` ends with a flexible array packing cpumask and `mm_cid` regions; static definitions (`init_mm`, `efi_mm`) must use `MM_STRUCT_FLEXIBLE_ARRAY_INIT`.
+
+## Concurrency, Synchronization, and Error Handling
+
+- **Lock Hierarchy:** The `mmap_lock` (semaphore) must always be acquired before any per-VMA lock. When performing operations that might trigger nested lock acquisition (e.g., `vma_start_write`), ensure the lock is released if the operation is interrupted by a signal to prevent deadlocks.
+- **Atomic Contexts:** Memory allocation paths (e.g., `vm_area_alloc`) must not sleep in non-preemptible or interrupt contexts. Use `GFP_ATOMIC` only when strictly necessary and ensure that all state tracking variables are uniquely assigned to prevent ambiguity during concurrent access.
+- **Memory Barriers:** When publishing a shared object (e.g., `anon_vma`), use appropriate memory barriers to ensure the initialization state is fully visible to concurrent readers, preventing use-after-free or deadlocks.
+- **Symmetry:** Every successful resource allocation or accounting step (e.g., `mmgrab`, `fget`) must be undone in the exact reverse order on the error path.
+- **Error Sentinels:** Always distinguish between `NULL` pointers and `ERR_PTR` sentinels. When a multi-step initialization fails, ensure that all intermediate file references and VMA state are cleaned up, even if the VMA was not yet fully established.
+- **State Restoration:** If a function is interrupted by a signal (e.g., `TASK_KILLABLE` wait), restore all modified state variables (like `vm_refcnt` offsets) before returning to userspace.
+- **TLB Invalidation:** When modifying page table entries (PTEs) or VMA flags, ensure that all necessary TLB flushes occur before the modified state is made visible to other processors to prevent stale hardware cache usage.
+- **State Machine Invariants:** Ensure that all state machine flags (e.g., `MMF_UNSTABLE`) are updated only after the corresponding resource allocation or state transition has successfully completed.
+- **Input Validation:** All user-provided offsets, lengths, and flags must be validated against the current dynamic limits of the target object before any memory access occurs.
+- **Architecture-Specific Accessors:** Use `pte_offset_map()` and related architecture-specific accessors instead of direct pointer dereferencing to ensure compatibility with hardware-specific page table formats.

@@ -26,3 +26,24 @@
 - **Priority inheritance (`pi_lock`):** RT-mutex PI chain traversal and updates must be serialized under `pi_lock` and checked for deadlock cycles.
 - **`sched_ext` (`SCHED_EXT`, `kernel/sched/ext.c`):** Tracks task ownership via atomic `p->scx.ops_state` (`NONE -> QUEUEING -> QUEUED -> DISPATCHING`); dispatch queues (DSQs) cannot mix FIFO and PRIQ (`vtime`) ordering on the same DSQ.
 - **CPU hotplug (`sched_cpu_deactivate()` / `sched_cpu_dying()`):** Per-CPU scheduler timers (such as `dl_server`'s `dl_timer` stopped by `dl_server_stop()` in `sched_cpu_dying()`) must be cancelled before the CPU goes offline and gated by `cpu_online()` in arming paths (`dl_server_start()`), or firing after `cpu_present_mask` removal triggers warnings in `cpudl_set()`.
+
+## Synchronization and Concurrency Invariants
+
+- **Lock Hierarchy:** `pi_lock` -> `rq->__lock`. Never acquire `pi_lock` while holding `rq->__lock` unless via `task_rq_lock()`.
+- **Atomic Context:** Sleeping allocations (`GFP_KERNEL`) are forbidden inside `rq->__lock` or where `preempt_count()` is non-zero.
+- **RCU Usage:** Access to `task_group` or `autogroup` outside `rq` locks requires `rcu_read_lock()` and `rcu_dereference()`.
+- **Pointer Validation:** Validate `p->sched_class` and `p->cgroups` before dereference; these may be NULL during task exit or early boot.
+- **Arithmetic Integrity:** Clamp load average and share calculations to non-zero minimums to prevent integer underflow.
+- **I/O Scheduling:** Do not call `blk_mq_run_hw_queues` while holding `rq->__lock` to prevent lock inversion with block layer request queue locks.
+- **State Machine Stability:** Intermediate states (e.g., `SCX_RQ_IN_WAKEUP`) must be stable before transitioning; use `lockdep_assert_held()` to verify state ownership.
+- **Timestamp Validation:** Always validate timestamps (e.g., `rq->clock`) for non-zero values before calculating idle durations to prevent division-by-zero or negative interval logic.
+- **Hierarchy Traversal:** When traversing cgroup hierarchies, use per-level `sched_entity` pointers; never assume the root pointer is valid for sub-level accounting.
+- **Callback Reentrancy:** Callbacks (e.g., `ops.dequeue`) must not re-acquire locks held by the caller; ensure all locks are dropped before invoking external scheduler hooks.
+- **Task Migration Constraints:** Always check `task_is_migration_disabled(p)` before attempting load balance migrations to avoid infinite loops in the balancer.
+- **Accounting Context:** Ensure accounting hooks (e.g., PSI) use the actual execution context rather than the scheduling context when they differ (e.g., proxy execution).
+- **Augmented Tree Integrity:** Ensure all augmented fields (e.g., `min_vruntime`) are fully initialized before inserting nodes into the RB-tree to prevent corruption during tree balancing.
+- **CPU Deadline (`cpudl`):** Use `cpudl_set()` and `cpudl_clear()` to manage CPU availability for `SCHED_DEADLINE` tasks; ensure `cpudl_cleanup()` is called on module unload to prevent memory leaks in `cpudl_item` arrays.
+- **Autogroup Lifecycle:** `autogroup_task_group()` must be used to resolve the effective `task_group` for a task; ensure `kref` is managed correctly via `autogroup_free()` when the group is destroyed.
+- **Context Accounting:** When proxy execution occurs, PSI accounting must be directed to the donor's cgroup, not the current task's cgroup, to prevent misattribution.
+- **State Ownership:** State ownership checks (e.g., `SCX_RQ_IN_WAKEUP`) must be performed after acquiring the relevant `rq` lock to ensure the task state is stable and not subject to concurrent modification.
+- **API Contract:** Always check return values of scheduler API calls (e.g., timer registration) to ensure requested features were successfully applied before proceeding with state transitions.

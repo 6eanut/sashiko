@@ -38,3 +38,13 @@
   * Use `io_req_queue_tw_complete()` (never fabricate `io_tw_token_t` on the stack) outside `task_work` context, and use `io_eventfd_put()` (never `io_eventfd_free()` directly).
   * Ring-geometry mutations (`io_register_resize_rings()`) require `IORING_SETUP_DEFER_TASKRUN`.
   * Generic poll (`io_uring/poll.c`) must not treat `POLLERR` as a generic error; leave event bit interpretation to opcode issue handlers.
+
+## Synchronization and Concurrency Contracts
+* **Lock Hierarchy**: `ctx->uring_lock` is the primary mutex for submission/completion. `ctx->completion_lock` protects the CQ ring and overflow list. `ctx->timeout_lock` (raw spinlock) must never be held while calling functions that might sleep or acquire mutexes.
+* **Task Context**: `io-wq` workers are distinct from the submitter task. Accessing `current->mm` or `current->files` from `io-wq` is only safe if the request was prepared with `REQ_F_NEED_CLEANUP` or explicitly tracked via `io_req_track_inflight()`.
+* **Memory Barriers**: Use `smp_load_acquire` and `smp_store_release` for `req->iopoll_completed` and ring head/tail pointers to ensure visibility across CPU cores.
+
+## Memory Safety and Allocation
+* **Cache Management**: Use `io_cache_alloc()` and `io_cache_free()` for high-frequency objects (e.g., `io_kiocb`). Ensure `io_alloc_cache_put()` returns `true` before assuming the object is cached; otherwise, use `kvfree()`.
+* **Buffer Validation**: Always validate `sqe->len` and `sqe->addr` against `rsrc_node` limits. Use `iov_iter_count()` to verify remaining bytes before performing `copy_from_user` or `copy_to_user`.
+* **Integer Overflows**: All size calculations involving `sqe` parameters must use `check_add_overflow()` or `check_mul_overflow()` to prevent wrapping, especially when calculating buffer offsets or array indices.

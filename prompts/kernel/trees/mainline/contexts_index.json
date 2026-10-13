@@ -126,6 +126,21 @@
       ]
     },
     {
+      "file": "clk.md",
+      "covered_paths": [
+        "drivers/clk/",
+        "include/linux/clk-provider.h"
+      ],
+      "triggers": [
+        "drivers/clk/",
+        "clk_hw",
+        "clk_ops",
+        "clk_init_data",
+        "devm_clk_hw_register",
+        "of_clk_add_hw_provider"
+      ]
+    },
+    {
       "file": "cxl.md",
       "covered_paths": [
         "drivers/cxl/",
@@ -150,6 +165,21 @@
         "dax_layout_busy_page",
         "dax_iomap_",
         "dax_writeback_mapping_range"
+      ]
+    },
+    {
+      "file": "dmaengine.md",
+      "covered_paths": [
+        "drivers/dma/",
+        "include/linux/dmaengine.h"
+      ],
+      "triggers": [
+        "drivers/dma/",
+        "dma_device",
+        "dma_chan",
+        "dma_async_tx_descriptor",
+        "dmaengine_terminate_sync",
+        "vchan_"
       ]
     },
     {
@@ -186,6 +216,23 @@
         "#gpio-cells",
         "#clock-cells",
         "#interrupt-cells"
+      ]
+    },
+    {
+      "file": "ext4.md",
+      "covered_paths": [
+        "fs/ext4/",
+        "fs/jbd2/",
+        "include/linux/jbd2.h"
+      ],
+      "triggers": [
+        "fs/ext4/",
+        "fs/jbd2/",
+        "ext4_inode_info",
+        "ext4_sb_info",
+        "jbd2_journal_start",
+        "jbd2_journal_stop",
+        "ext4_ext_"
       ]
     },
     {
@@ -600,6 +647,39 @@
       ]
     },
     {
+      "file": "net-drivers.md",
+      "covered_paths": [
+        "drivers/net/ethernet/",
+        "drivers/net/phy/",
+        "include/linux/netdevice.h"
+      ],
+      "triggers": [
+        "drivers/net/ethernet/",
+        "net_device_ops",
+        "napi_enable",
+        "napi_disable",
+        "netif_napi_add",
+        "ndo_open",
+        "ndo_stop",
+        "ndo_start_xmit"
+      ]
+    },
+    {
+      "file": "netfilter.md",
+      "covered_paths": [
+        "net/netfilter/",
+        "include/net/netfilter/"
+      ],
+      "triggers": [
+        "net/netfilter/",
+        "nf_tables",
+        "nft_",
+        "nf_conntrack",
+        "nf_hook_ops",
+        "nft_trans"
+      ]
+    },
+    {
       "file": "networking-core.md",
       "covered_paths": [
         "net/core/",
@@ -641,6 +721,21 @@
       ]
     },
     {
+      "file": "nvme.md",
+      "covered_paths": [
+        "drivers/nvme/",
+        "include/linux/nvme.h"
+      ],
+      "triggers": [
+        "drivers/nvme/",
+        "nvme_ctrl",
+        "nvme_ns",
+        "nvme_queue",
+        "nvme_change_ctrl_state",
+        "nvme_quiesce_io_queues"
+      ]
+    },
+    {
       "file": "objtool.md",
       "covered_paths": [
         "tools/objtool/"
@@ -666,6 +761,22 @@
         "of_check_msi_parent",
         "msi-map",
         "msi-parent"
+      ]
+    },
+    {
+      "file": "pci.md",
+      "covered_paths": [
+        "drivers/pci/",
+        "include/linux/pci.h"
+      ],
+      "triggers": [
+        "drivers/pci/",
+        "pci_dev",
+        "pci_driver",
+        "pci_enable_device",
+        "pci_disable_device",
+        "pci_set_master",
+        "pcie_capability_"
       ]
     },
     {
@@ -701,6 +812,20 @@
       ]
     },
     {
+      "file": "riscv.md",
+      "covered_paths": [
+        "arch/riscv/"
+      ],
+      "triggers": [
+        "arch/riscv/",
+        "riscv_",
+        "csr_read",
+        "csr_write",
+        "sbi_ecall",
+        "local_flush_tlb_"
+      ]
+    },
+    {
       "file": "rust.md",
       "covered_paths": [
         "rust/",
@@ -730,6 +855,24 @@
         "update_load_avg",
         "sched_cpu_dying",
         "dl_server_"
+      ]
+    },
+    {
+      "file": "scsi.md",
+      "covered_paths": [
+        "drivers/scsi/",
+        "drivers/ufs/",
+        "include/scsi/"
+      ],
+      "triggers": [
+        "drivers/scsi/",
+        "drivers/ufs/",
+        "Scsi_Host",
+        "scsi_cmnd",
+        "scsi_device",
+        "scsi_host_template",
+        "scsi_done",
+        "ufshcd_"
       ]
     },
     {
@@ -764,6 +907,21 @@
         "ksmbd_",
         "refill_work",
         "immediate_work"
+      ]
+    },
+    {
+      "file": "sound.md",
+      "covered_paths": [
+        "sound/",
+        "include/sound/"
+      ],
+      "triggers": [
+        "sound/",
+        "snd_soc_",
+        "snd_pcm_",
+        "snd_card",
+        "snd_kcontrol",
+        "snd_soc_dapm_"
       ]
     },
     {
@@ -826,6 +984,22 @@
       ]
     },
     {
+      "file": "usb.md",
+      "covered_paths": [
+        "drivers/usb/",
+        "include/linux/usb.h"
+      ],
+      "triggers": [
+        "drivers/usb/",
+        "usb_device",
+        "usb_interface",
+        "urb",
+        "usb_submit_urb",
+        "usb_kill_urb",
+        "usb_anchor"
+      ]
+    },
+    {
       "file": "vfs.md",
       "covered_paths": [
         "fs/namei.c",
@@ -862,6 +1036,37 @@
         "bss_info_changed",
         "ieee80211_vif_cfg_change_notify",
         "ieee80211_link_info_change_notify"
+      ]
+    },
+    {
+      "file": "x86.md",
+      "covered_paths": [
+        "arch/x86/"
+      ],
+      "triggers": [
+        "arch/x86/",
+        "cpu_feature_enabled",
+        "boot_cpu_has",
+        "wrmsrl",
+        "rdmsrl",
+        "fpu_",
+        "sev_",
+        "tdx_"
+      ]
+    },
+    {
+      "file": "xfs.md",
+      "covered_paths": [
+        "fs/xfs/"
+      ],
+      "triggers": [
+        "fs/xfs/",
+        "xfs_mount",
+        "xfs_inode",
+        "xfs_trans",
+        "xfs_ilock",
+        "xfs_iunlock",
+        "xfs_buf"
       ]
     }
   ]

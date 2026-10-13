@@ -34,3 +34,17 @@
 
 - **GSS security and lifetimes:** Hold `sd_lock` across sequence-window checks and updates (handling `MAXSEQ` overflow and `sd_max - GSS_SEQ_WIN` underflow); check `gss_verify_mic()`, `gss_wrap()`, and `gss_unwrap()` against `GSS_S_COMPLETE`; pair `gss_svc_searchbyctx()` with `cache_put()`; account for RFC 4121 Kerberos v2 trailing checksum slack (`au_ralign != au_rslack`); match `uid`, `service`, and in-flight state in `__gss_find_upcall()`; and skip re-verification when `rqstp->rq_deferred` is set.
 - **Network namespaces:** Always use `xprt->xpt_net` / `serv->sv_net` (server) or `xprt->xprt_net` / `clnt->cl_xprt->xprt_net` (client) with `sock_create_kern(net, ...)` and `rdma_create_id(net, ...)`—never `&init_net` or `current->nsproxy->net_ns`.
+
+## Synchronization and Error Invariants
+
+- **Lock Hierarchy:**
+  - `pipefs_sb_lock`: Protects `sunrpc_net->pipefs_sb`.
+  - `rpc_client_lock`: Protects `all_clients` list.
+  - `gc_seq_lock`: Protects sequence number updates in `gss_cl_ctx`.
+  - Never perform blocking operations (e.g., `mutex_lock`, `kmalloc(GFP_KERNEL)`) while holding a spinlock.
+- **RCU Protection:** Use `rcu_read_lock()` / `rcu_read_unlock()` when dereferencing `gc_ctx`. Use `rcu_assign_pointer()` and `synchronize_rcu()` when replacing the context.
+- **Input Validation:** Use `xdr_stream` helpers for length validation. Use `check_add_overflow()` or `check_mul_overflow()` for buffer size calculations.
+- **Teardown:** Cancel all pending `work_struct` items and ensure no RCU readers remain before freeing objects. Use `IS_ERR()` for all pointer return checks.
+- **Asynchronous Safety:** Ensure all background tasks (e.g., `rpc_task`, `work_struct`) are fully drained or cancelled before the parent object is freed. Use `cancel_delayed_work_sync()` to prevent use-after-free in timer callbacks.
+- **Memory Safety:** Always validate `xdr_stream` buffer lengths against the actual received packet size before parsing. Use `check_add_overflow` for all XDR-related size calculations to prevent integer wrap-around.
+- **State Machine:** Ensure that state transitions (e.g., `XPRT_CONNECTED` to `XPRT_CLOSING`) are atomic and protected by the appropriate transport lock to prevent race conditions during concurrent teardown and reconnection attempts.
