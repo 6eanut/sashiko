@@ -77,3 +77,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | SKB, Socket, Netfilter, Routing & SNMP API | `skb_put`, `skb_push`, `skb_pull`, `pskb_may_pull`, `skb_unshare`, `release_sock`, `sock_release`, `sock_hold`, `sock_put`, `NF_HOOK`, `skb_dst_force`, `SNMP_*` | `apis/networking-core.md` |
 | 64-Bit Network Driver Statistics (`u64_stats_sync`) | `u64_stats_sync`, `u64_stats_init`, `u64_stats_update_begin`, `u64_stats_update_begin_irqsave`, `u64_stats_fetch_begin`, `u64_stats_fetch_retry` | `apis/networking-drivers.md` |
 | Open Firmware (DT) Node & Iterator API | `for_each_child_of_node*`, `for_each_available_child_of_node*`, `of_node_put`, `of_node_get`, `of_parse_phandle`, `of_get_parent`, `of_get_next_parent`, `of_find_*` | `apis/of.md` |
+| PCI Endpoint & IRQ Vector API | `pci_epc_get`, `pci_epf_create`, `pci_epf_destroy`, `pci_alloc_irq_vectors`, `pci_free_irq_vectors`, `pci_enable_msi` | `apis/pci.md` |

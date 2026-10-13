@@ -758,6 +758,34 @@
           "of_find_"
         ]
       }
+    },
+    {
+      "file": "pci.md",
+      "defining_files": [
+        "include/linux/pci.h",
+        "include/linux/pci-epc.h",
+        "include/linux/pci-epf.h",
+        "drivers/pci/endpoint/pci-epc-core.c",
+        "drivers/pci/endpoint/pci-epf-core.c",
+        "drivers/pci/msi/api.c"
+      ],
+      "symbols": {
+        "exact": [
+          "pci_epc_get",
+          "pci_epc_put",
+          "pci_epf_create",
+          "pci_epf_destroy",
+          "pci_alloc_irq_vectors",
+          "pci_free_irq_vectors",
+          "pci_enable_msi",
+          "pci_disable_msi"
+        ],
+        "prefixes": [
+          "pci_epc_",
+          "pci_epf_",
+          "pci_ep_"
+        ]
+      }
     }
   ]
 }

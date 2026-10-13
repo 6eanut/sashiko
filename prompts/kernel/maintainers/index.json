@@ -185,6 +185,19 @@
         "fs/lockd/",
         "include/uapi/linux/nfsd/"
       ]
+    },
+    {
+      "file": "pci.md",
+      "sections": [
+        "PCI SUBSYSTEM",
+        "PCI ENDPOINT SUBSYSTEM"
+      ],
+      "paths": [
+        "drivers/pci/",
+        "include/linux/pci.h",
+        "include/linux/pci-epc.h",
+        "include/linux/pci-epf.h"
+      ]
     }
   ]
 }
