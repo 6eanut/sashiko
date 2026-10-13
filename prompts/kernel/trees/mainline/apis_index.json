@@ -855,6 +855,30 @@
           "rcu_"
         ]
       }
+    },
+    {
+      "file": "scheduler.md",
+      "defining_files": [
+        "include/linux/sched.h",
+        "kernel/sched/core.c"
+      ],
+      "symbols": {
+        "exact": [
+          "set_current_state",
+          "__set_current_state",
+          "schedule",
+          "wake_up_process",
+          "try_to_wake_up",
+          "migrate_disable",
+          "migrate_enable",
+          "is_migration_disabled",
+          "set_cpus_allowed_ptr",
+          "kthread_bind"
+        ],
+        "prefixes": [
+          "wake_up_"
+        ]
+      }
     }
   ]
 }

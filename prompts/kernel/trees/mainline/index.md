@@ -47,6 +47,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Perf Tools (`tools/perf/`) | `tools/perf/`, `perf_tool`, `perf_env`, `DECLARE_RC_STRUCT`, `thread__get`, `maps__get`, `fdopendir` | `contexts/perf.md` |
 | Generic Power Domains (`genpd`) | `drivers/pmdomain/`, `pm_genpd_`, `of_genpd_`, `GENPD_FLAG_NO_STAY_ON`, `exynos_pd_` | `contexts/pmdomain.md` |
 | Kernel Rust Toolchain & Pin-Init | `rust/`, `*.rs`, `__rust_helper`, `rust_helper_`, `RUST_CONST_HELPER_`, `try_pin_init`, `pin_init`, `build_assert!` | `contexts/rust.md` |
+| Scheduler Internals (EEVDF, RT, DL, `sched_ext`) | `kernel/sched/`, `double_rq_lock`, `__pick_eevdf`, `update_load_avg`, `sched_cpu_dying`, `dl_server_` | `contexts/scheduler.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -83,3 +84,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | PCI Endpoint & IRQ Vector API | `pci_epc_get`, `pci_epf_create`, `pci_epf_destroy`, `pci_alloc_irq_vectors`, `pci_free_irq_vectors`, `pci_enable_msi` | `apis/pci.md` |
 | Power Management & Runtime PM API | `pm_runtime_*`, `__pm_runtime_*`, `rpm_idle`, `rpm_suspend`, `rpm_resume`, `pm_hibernate_is_recovering`, `pm_hibernation_mode_is_suspend`, `pm_sleep_ptr`, `pm_ptr` | `apis/pm.md` |
 | Read-Copy-Update (RCU) API | `rcu_read_lock`, `rcu_assign_pointer`, `rcu_dereference`, `call_rcu`, `synchronize_rcu`, `kfree_rcu`, `kvfree_call_rcu`, `list_del_rcu`, `hlist_del_rcu` | `apis/rcu.md` |
+| Task State, Wakeup & Migration API | `set_current_state`, `schedule`, `wake_up_process`, `try_to_wake_up`, `migrate_disable`, `set_cpus_allowed_ptr`, `kthread_bind` | `apis/scheduler.md` |

@@ -716,6 +716,21 @@
         "pin_init",
         "build_assert!"
       ]
+    },
+    {
+      "file": "scheduler.md",
+      "covered_paths": [
+        "kernel/sched/"
+      ],
+      "triggers": [
+        "kernel/sched/",
+        "double_rq_lock",
+        "lockdep_assert_rq_held",
+        "__pick_eevdf",
+        "update_load_avg",
+        "sched_cpu_dying",
+        "dl_server_"
+      ]
     }
   ]
 }
