@@ -24,6 +24,12 @@ pub type PromptVarExtractor<S> = Box<dyn Fn(&S) -> String + Send + Sync>;
 /// Dynamic file inclusion resolver mapping workflow state `S` to a list of paths.
 pub type DynamicInclusionResolver<S> = Box<dyn Fn(&S) -> Vec<PathBuf> + Send + Sync>;
 
+/// Content filter/transform applied to each included file in a named section.
+pub type ContentTransform = Box<dyn Fn(&str) -> String + Send + Sync>;
+
+/// Wrapper function formatting a named dynamic section around its non-empty inner content.
+pub type SectionWrapper<S> = Box<dyn Fn(&S, &str) -> String + Send + Sync>;
+
 /// Directory filter function.
 pub type DirFilter = Box<dyn Fn(&str) -> bool + Send + Sync>;
 
@@ -35,12 +41,20 @@ pub enum InclusionDirective {
     Directory { path: PathBuf, filter: DirFilter },
 }
 
+struct DynamicSection<S> {
+    marker: String,
+    resolver: DynamicInclusionResolver<S>,
+    transform: Option<ContentTransform>,
+    wrapper: SectionWrapper<S>,
+}
+
 /// A declarative prompt template parameterized over workflow state `S`.
 pub struct PromptTemplate<S> {
     raw_template: String,
     vars: Vec<(String, PromptVarExtractor<S>)>,
     static_inclusions: Vec<InclusionDirective>,
     dynamic_inclusions: Vec<DynamicInclusionResolver<S>>,
+    dynamic_sections: Vec<DynamicSection<S>>,
 }
 
 /// Placeholder for files resolved from state, which carry no path in the
@@ -93,6 +107,7 @@ impl<S> PromptTemplate<S> {
             vars: Vec::new(),
             static_inclusions: Vec::new(),
             dynamic_inclusions: Vec::new(),
+            dynamic_sections: Vec::new(),
         }
     }
 
@@ -133,6 +148,29 @@ impl<S> PromptTemplate<S> {
         self
     }
 
+    /// Adds a named dynamic section resolved from workflow state `S` at `marker`
+    /// with an optional content transform and a wrapper applied only when at
+    /// least one resolved file is present.
+    pub fn include_section_from_state<R, W>(
+        mut self,
+        marker: &str,
+        resolver: R,
+        transform: Option<ContentTransform>,
+        wrapper: W,
+    ) -> Self
+    where
+        R: Fn(&S) -> Vec<PathBuf> + Send + Sync + 'static,
+        W: Fn(&S, &str) -> String + Send + Sync + 'static,
+    {
+        self.dynamic_sections.push(DynamicSection {
+            marker: marker.to_string(),
+            resolver: Box::new(resolver),
+            transform,
+            wrapper: Box::new(wrapper),
+        });
+        self
+    }
+
     /// Renders the expanded prompt for sending to the LLM (expanding file contents).
     pub async fn render_for_model(&self, state: &S, base_dir: &Path) -> Result<String> {
         let mut segments = vec![Segment::Template(self.raw_template.clone())];
@@ -144,8 +182,9 @@ impl<S> PromptTemplate<S> {
                     // A directive naming a file that is not there resolves to
                     // nothing. It must still be consumed, or it reaches the
                     // model as literal text.
-                    let full_path = base_dir.join(path);
-                    let block = if full_path.exists() {
+                    let full_path =
+                        crate::prompt_bundle::resolve_in_prompt_dir_async(base_dir, path).await?;
+                    let block = if crate::prompt_bundle::path_exists_async(&full_path).await? {
                         let content = fs::read_to_string(&full_path)
                             .await
                             .with_context(|| format!("Failed to read file: {:?}", full_path))?;
@@ -156,8 +195,9 @@ impl<S> PromptTemplate<S> {
                     (path, block)
                 }
                 InclusionDirective::Directory { path, filter } => {
-                    let dir_path = base_dir.join(path);
-                    if !dir_path.exists() {
+                    let dir_path =
+                        crate::prompt_bundle::resolve_in_prompt_dir_async(base_dir, path).await?;
+                    if !crate::prompt_bundle::path_exists_async(&dir_path).await? {
                         place(&mut segments, &include_directive(path), String::new());
                         continue;
                     }
@@ -193,8 +233,9 @@ impl<S> PromptTemplate<S> {
         let mut dynamic = String::new();
         for dyn_inc in &self.dynamic_inclusions {
             for path in dyn_inc(state) {
-                let full_path = base_dir.join(&path);
-                if full_path.exists() {
+                let full_path =
+                    crate::prompt_bundle::resolve_in_prompt_dir_async(base_dir, &path).await?;
+                if crate::prompt_bundle::path_exists_async(&full_path).await? {
                     let content = fs::read_to_string(&full_path)
                         .await
                         .with_context(|| format!("Failed to read dynamic file: {:?}", full_path))?;
@@ -204,6 +245,35 @@ impl<S> PromptTemplate<S> {
         }
         if !place(&mut segments, DYNAMIC_INCLUDE_MARKER, dynamic.clone()) {
             trailing.push_str(&dynamic);
+        }
+
+        for section in &self.dynamic_sections {
+            let mut inner = String::new();
+            for path in (section.resolver)(state) {
+                let full_path =
+                    crate::prompt_bundle::resolve_in_prompt_dir_async(base_dir, &path).await?;
+                if crate::prompt_bundle::path_exists_async(&full_path).await? {
+                    let raw_content = fs::read_to_string(&full_path)
+                        .await
+                        .with_context(|| format!("Failed to read dynamic file: {:?}", full_path))?;
+                    let content = match &section.transform {
+                        Some(tf) => tf(&raw_content),
+                        None => raw_content,
+                    };
+                    let trimmed = content.trim();
+                    if !trimmed.is_empty() {
+                        inner.push_str(&format!("\n\n# {}\n{}\n", path.display(), trimmed));
+                    }
+                }
+            }
+            let block = if inner.is_empty() {
+                String::new()
+            } else {
+                (section.wrapper)(state, &inner)
+            };
+            if !place(&mut segments, &section.marker, block.clone()) {
+                trailing.push_str(&block);
+            }
         }
 
         Ok(self.assemble(segments, trailing, state))
@@ -236,6 +306,20 @@ impl<S> PromptTemplate<S> {
         }
         if !place(&mut segments, DYNAMIC_INCLUDE_MARKER, dynamic.clone()) {
             trailing.push_str(&dynamic);
+        }
+
+        for section in &self.dynamic_sections {
+            let files = (section.resolver)(state);
+            let block = if files.is_empty() {
+                String::new()
+            } else {
+                let tags: Vec<String> = files.iter().map(|p| format!("@{}", p.display())).collect();
+                let inner = format!("\n\n{}\n", tags.join(", "));
+                (section.wrapper)(state, &inner)
+            };
+            if !place(&mut segments, &section.marker, block.clone()) {
+                trailing.push_str(&block);
+            }
         }
 
         self.assemble(segments, trailing, state)

@@ -300,7 +300,13 @@ fn build_prompts_manifest(
     };
 
     let mut pre_screen = Vec::new();
-    for g in &state.selected_guides {
+    for g in state
+        .selected_guides
+        .iter()
+        .chain(state.selected_maintainer_notes.iter())
+        .chain(state.selected_code_contexts.iter())
+        .chain(state.selected_api_guides.iter())
+    {
         let trimmed = g.trim();
         if sanitize_prompt_relpath(trimmed) {
             push_unique(&mut pre_screen, trimmed);

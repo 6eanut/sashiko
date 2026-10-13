@@ -336,6 +336,56 @@ impl Worker {
             ),
         };
 
+        let (
+            tree_id,
+            kernel_version,
+            tree_version_note,
+            selected_maintainer_notes,
+            selected_code_contexts,
+            selected_api_guides,
+            overflow_guides,
+            guide_byte_sizes,
+        ) = if self.project == ProjectId::Linux {
+            let branch_hint = patchset.get("baseline_branch").and_then(|v| v.as_str());
+            let resolved_tree = crate::tree_prompts::resolve_tree_snapshot(
+                &self.prompts.base_dir,
+                worktree_path,
+                &baseline_sha,
+                branch_hint,
+            )
+            .await;
+            self.tools.set_active_tree_id(resolved_tree.tree_id.clone());
+
+            let budgeted = crate::tree_prompts::resolve_deterministic_prompts_and_budget(
+                &self.prompts.base_dir,
+                worktree_path,
+                &resolved_tree.tree_id,
+                &target_commit_diff,
+            )
+            .await?;
+            (
+                resolved_tree.tree_id,
+                resolved_tree.kernel_version,
+                resolved_tree.version_mismatch_note,
+                budgeted.maintainer_notes,
+                budgeted.code_contexts,
+                budgeted.api_guides,
+                budgeted.overflow_guides,
+                budgeted.guide_byte_sizes,
+            )
+        } else {
+            (
+                String::new(),
+                String::new(),
+                None,
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                std::collections::HashMap::new(),
+            )
+        };
+
         let mut state = LinuxPatchReviewState {
             ps_id,
             p_id,
@@ -348,6 +398,14 @@ impl Worker {
             series_range: self.series_range.clone(),
             follow_up_series_context,
             selected_guides: Vec::new(),
+            tree_id,
+            kernel_version,
+            tree_version_note,
+            selected_maintainer_notes,
+            selected_code_contexts,
+            selected_api_guides,
+            overflow_guides,
+            guide_byte_sizes,
             manual_stages: self.stages.clone(),
             custom_prompt: self.custom_prompt.clone(),
             planned_stages: Vec::new(),

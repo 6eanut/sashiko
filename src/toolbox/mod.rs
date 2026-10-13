@@ -40,6 +40,7 @@ pub mod read_prompt;
 pub struct SashikoToolContext {
     pub worktree_path: PathBuf,
     pub prompts_path: Option<PathBuf>,
+    pub active_tree_id: RwLock<Option<String>>,
     pub active_patch_files: RwLock<Vec<String>>,
     pub virtual_head: RwLock<Option<String>>,
     pub(crate) cache: Arc<RwLock<std::collections::HashMap<String, Value>>>,
@@ -78,6 +79,7 @@ impl ToolBox {
         let context = SashikoToolContext {
             worktree_path,
             prompts_path,
+            active_tree_id: RwLock::new(None),
             active_patch_files: RwLock::new(Vec::new()),
             virtual_head: RwLock::new(None),
             cache: cache.clone(),
@@ -124,6 +126,12 @@ impl ToolBox {
     pub fn set_active_patch_files(&mut self, files: Vec<String>) {
         let mut active = self.context.active_patch_files.write().unwrap();
         *active = files;
+    }
+
+    /// Sets the active prompt tree snapshot identifier (e.g. `"mainline"` or `"linux-6.6.y"`).
+    pub fn set_active_tree_id(&self, tree_id: String) {
+        let mut active = self.context.active_tree_id.write().unwrap();
+        *active = Some(tree_id);
     }
 
     /// Replaces occurrences of HEAD in a reference string with the virtualized head commit SHA.

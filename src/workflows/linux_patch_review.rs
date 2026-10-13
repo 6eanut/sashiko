@@ -46,6 +46,22 @@ pub struct LinuxPatchReviewState {
     /// Subsystem guide markdown files selected during the pre-screen and
     /// shared with every stage.
     pub selected_guides: Vec<String>,
+    /// Active tree snapshot identifier (e.g. "mainline", "linux-6.6.y").
+    pub tree_id: String,
+    /// Kernel version label for the active tree snapshot (e.g. "6.14", "6.6").
+    pub kernel_version: String,
+    /// Optional note when baseline version differs from nearest older snapshot.
+    pub tree_version_note: Option<String>,
+    /// Part 1: Maintainers notes relative paths (e.g. "maintainers/networking.md").
+    pub selected_maintainer_notes: Vec<String>,
+    /// Part 2: Subsystem/file code context relative paths (e.g. "trees/mainline/contexts/networking-core.md").
+    pub selected_code_contexts: Vec<String>,
+    /// Part 3: Kernel API guide relative paths (e.g. "trees/mainline/apis/rcu.md").
+    pub selected_api_guides: Vec<String>,
+    /// Overflow guides exceeding inline byte caps, advertised for `read_prompt`.
+    pub overflow_guides: Vec<String>,
+    /// Precomputed byte sizes of available 3-part guides for in-memory budget enforcement.
+    pub guide_byte_sizes: std::collections::HashMap<String, usize>,
     /// Optional manual stages filter (e.g. `--stages goal,locking`).
     pub manual_stages: Option<Vec<String>>,
     /// Caller-supplied instructions appended to the shared system prompt.
@@ -92,6 +108,43 @@ pub struct LinuxPatchReviewState {
     pub fixes: String,
 }
 
+impl LinuxPatchReviewState {
+    /// Returns the active tree snapshot identifier, defaulting to `"mainline"`.
+    pub fn effective_tree_id(&self) -> &str {
+        let trimmed = self.tree_id.trim();
+        if trimmed.is_empty() {
+            "mainline"
+        } else {
+            trimmed
+        }
+    }
+
+    /// Returns the active kernel version label, defaulting to `"mainline"`.
+    pub fn effective_kernel_version(&self) -> &str {
+        let trimmed = self.kernel_version.trim();
+        if trimmed.is_empty() {
+            self.effective_tree_id()
+        } else {
+            trimmed
+        }
+    }
+
+    /// Returns all selected prompt identifiers across legacy guides and the 3-part layout.
+    pub fn all_selected_prompts(&self) -> Vec<String> {
+        let mut out = Vec::new();
+        for g in self
+            .selected_guides
+            .iter()
+            .chain(self.selected_maintainer_notes.iter())
+            .chain(self.selected_code_contexts.iter())
+            .chain(self.selected_api_guides.iter())
+        {
+            push_unique_string(&mut out, g);
+        }
+        out
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Typed Output Structures for Stage Serialization
 // ---------------------------------------------------------------------------
@@ -99,6 +152,10 @@ pub struct LinuxPatchReviewState {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct PrescreenOutput {
     pub selected_prompts: Vec<String>,
+    #[serde(default)]
+    pub additional_contexts: Vec<String>,
+    #[serde(default)]
+    pub additional_apis: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -132,11 +189,25 @@ pub struct PostVerificationOutput {
 // ---------------------------------------------------------------------------
 
 pub fn linux_system_prompt(use_log: bool) -> PromptTemplate<LinuxPatchReviewState> {
+    linux_system_prompt_for_stage(use_log, true)
+}
+
+pub fn linux_system_prompt_for_stage(
+    use_log: bool,
+    is_technical_stage: bool,
+) -> PromptTemplate<LinuxPatchReviewState> {
     let current_date = chrono::Utc::now().format("%A, %B %d, %Y").to_string();
     let diff_var = if use_log {
         "{{target_commit_diff}}"
     } else {
         "{{target_commit_diff_only}}"
+    };
+    let maint_transform: Option<crate::workflow::prompt::ContentTransform> = if is_technical_stage {
+        Some(Box::new(
+            crate::tree_prompts::filter_maintainer_note_for_technical_stage,
+        ))
+    } else {
+        None
     };
 
     PromptTemplate::<LinuxPatchReviewState>::new(format!(
@@ -151,7 +222,7 @@ If tool output is truncated ('truncated': true), page only if directly relevant 
 <global_review_guidelines>
 The following documents contain the official technical patterns, architectural rules, and subsystem-specific guidelines that you MUST adhere to during your review. Use these as the absolute source of truth for identifying anti-patterns and violations.
 @includes
-</global_review_guidelines>
+</global_review_guidelines>@includes_maintainer_notes@includes_code_contexts@includes_api_guides{{{{tree_version_note_block}}}}{{{{overflow_guides_block}}}}
 
 === Active Git Metadata ===
 Target Commit SHA: {{{{target_commit_sha}}}}
@@ -166,6 +237,30 @@ Target Commit:
     .with_var("baseline_sha", |s: &LinuxPatchReviewState| s.baseline_sha.clone())
     .with_var("target_commit_diff", |s: &LinuxPatchReviewState| s.target_commit_diff.clone())
     .with_var("target_commit_diff_only", |s: &LinuxPatchReviewState| s.target_commit_diff_only.clone())
+    .with_var("tree_version_note_block", |s: &LinuxPatchReviewState| {
+        s.tree_version_note
+            .as_deref()
+            .map(str::trim)
+            .filter(|n| !n.is_empty())
+            .map_or_else(String::new, |note| {
+                format!("\n\n<tree_version_note>\n{note}\n</tree_version_note>")
+            })
+    })
+    .with_var("overflow_guides_block", |s: &LinuxPatchReviewState| {
+        if s.overflow_guides.is_empty() {
+            String::new()
+        } else {
+            let list = s
+                .overflow_guides
+                .iter()
+                .map(|g| format!("- {g}"))
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!(
+                "\n\n<additional_available_guides>\nThe following additional context and API guides matched this patch and can be read on demand via the read_prompt tool:\n{list}\n</additional_available_guides>"
+            )
+        }
+    })
     .with_var("prefetched_block", |s: &LinuxPatchReviewState| {
         if s.prefetch_failed {
             format!(
@@ -187,15 +282,54 @@ Target Commit:
         })
     })
     .include_files_from_state(|s: &LinuxPatchReviewState| {
-        let mut paths = Vec::new();
-        if !s.selected_guides.is_empty() {
-            for guide in &s.selected_guides {
-                paths.push(PathBuf::from("subsystem").join(guide));
-                paths.push(PathBuf::from("patterns").join(guide));
-            }
-        }
-        paths
+        // Bare selected guides reach the subsystem/ directory only through
+        // the budgeted three-part sections (see route_bare_guide_to_parts);
+        // including subsystem/ here as well would bypass the byte budgets
+        // and duplicate the guide.
+        s.selected_guides
+            .iter()
+            .map(|guide| PathBuf::from("patterns").join(guide))
+            .collect()
     })
+    .include_section_from_state(
+        "@includes_maintainer_notes",
+        |s: &LinuxPatchReviewState| {
+            s.selected_maintainer_notes
+                .iter()
+                .map(PathBuf::from)
+                .collect()
+        },
+        maint_transform,
+        |_s, inner| {
+            format!(
+                "\n\n<maintainer_notes>\nThe following documents contain subjective maintainer expectations, subsystem evolution directions, and coding conventions for the MAINTAINERS sections touched by this patch.\nIMPORTANT: Use these notes to evaluate architectural direction, unwelcome change patterns, and subsystem conventions. NEVER use maintainer notes to excuse or dismiss a concrete memory corruption, leak, race condition, or crash.{inner}</maintainer_notes>"
+            )
+        },
+    )
+    .include_section_from_state(
+        "@includes_code_contexts",
+        |s: &LinuxPatchReviewState| s.selected_code_contexts.iter().map(PathBuf::from).collect(),
+        None,
+        |s, inner| {
+            let tid = s.effective_tree_id();
+            let ver = s.effective_kernel_version();
+            format!(
+                "\n\n<code_context tree=\"{tid}\" kernel_version=\"{ver}\">\nThe following auto-generated documents describe how the affected kernel subsystems and files work in tree '{tid}' (Linux {ver}).{inner}</code_context>"
+            )
+        },
+    )
+    .include_section_from_state(
+        "@includes_api_guides",
+        |s: &LinuxPatchReviewState| s.selected_api_guides.iter().map(PathBuf::from).collect(),
+        None,
+        |s, inner| {
+            let tid = s.effective_tree_id();
+            let ver = s.effective_kernel_version();
+            format!(
+                "\n\n<kernel_api_rules tree=\"{tid}\" kernel_version=\"{ver}\">\nThe following documents specify calling-context rules, ownership lifecycles, return-value contracts, and known pitfalls for kernel APIs used in this patch in tree '{tid}' (Linux {ver}).{inner}</kernel_api_rules>"
+            )
+        },
+    )
 }
 
 // ---------------------------------------------------------------------------
@@ -1039,7 +1173,8 @@ pub fn extra_prompt_paths_for_state(
         Vec::with_capacity(state.all_concerns.len() + state.all_dismissed_concerns.len());
     combined.extend_from_slice(&state.all_concerns);
     combined.extend_from_slice(&state.all_dismissed_concerns);
-    extra_prompt_paths_for_items(&state.selected_guides, &combined, stage_lookup)
+    let selected = state.all_selected_prompts();
+    extra_prompt_paths_for_items(&selected, &combined, stage_lookup)
 }
 
 fn normalize_symbol_name(sym: &str) -> &str {
@@ -1327,13 +1462,14 @@ pub fn enrich_verification_output(
     stage_lookup: fn(&str) -> Option<&'static AnalysisStage>,
 ) {
     let read_prompts = outcome.read_prompts();
+    let selected_prompts = state.all_selected_prompts();
     for (idx, finding) in out.findings.iter_mut().enumerate() {
         // Category 1a findings originate strictly from C* concerns.
         enrich_item_provenance(
             finding,
             &state.all_concerns,
             &[],
-            &state.selected_guides,
+            &selected_prompts,
             &read_prompts,
             stage_lookup,
         );
@@ -1352,7 +1488,7 @@ pub fn enrich_verification_output(
             hard_case,
             primary_concerns,
             secondary_dismissals,
-            &state.selected_guides,
+            &selected_prompts,
             &read_prompts,
             stage_lookup,
         );
@@ -1383,7 +1519,7 @@ pub fn enrich_verification_output(
             dismissed,
             &state.all_dismissed_concerns,
             &[],
-            &state.selected_guides,
+            &selected_prompts,
             &read_prompts,
             stage_lookup,
         );
@@ -1431,22 +1567,93 @@ pub fn enrich_post_verification_output(
 // Stage Definitions
 // ---------------------------------------------------------------------------
 
+/// Routes a bare legacy guide name (e.g. "networking.md") selected by the
+/// prescreen into the three-part selections, so the per-part byte budgets
+/// applied at the end of the prescreen reduction also cover it. Only
+/// candidates with a known size are routed: an absent candidate names no
+/// guide, and routing it would advertise a nonexistent overflow guide. A
+/// guide that exists only as a flat legacy `subsystem/` file is routed as a
+/// tree-scoped code context, which resolves to the legacy file at render
+/// time; the system prompt does not include `subsystem/` guides directly.
+fn route_bare_guide_to_parts(state: &mut LinuxPatchReviewState, tid: &str, guide: &str) {
+    let maint_rel = format!("maintainers/{guide}");
+    if state.guide_byte_sizes.contains_key(&maint_rel) {
+        push_unique_string(&mut state.selected_maintainer_notes, &maint_rel);
+    }
+    let ctx_rel = format!("trees/{tid}/contexts/{guide}");
+    let api_rel = format!("trees/{tid}/apis/{guide}");
+    let has_ctx = state.guide_byte_sizes.contains_key(&ctx_rel);
+    let has_api = state.guide_byte_sizes.contains_key(&api_rel);
+    if has_ctx {
+        push_unique_string(&mut state.selected_code_contexts, &ctx_rel);
+    }
+    if has_api {
+        push_unique_string(&mut state.selected_api_guides, &api_rel);
+    }
+    if !has_ctx
+        && !has_api
+        && state
+            .guide_byte_sizes
+            .contains_key(&format!("subsystem/{guide}"))
+    {
+        push_unique_string(&mut state.selected_code_contexts, &ctx_rel);
+    }
+}
+
 pub fn prescreen_stage() -> Stage<LinuxPatchReviewState, PrescreenOutput> {
     Stage::builder("pre-screen")
         .system_prompt(PromptTemplate::<LinuxPatchReviewState>::new(
-            "You are an AI assistant preparing a Linux kernel patch review.\nReview the provided Patch and select all potentially relevant subsystem guides from the index below.\nCRITICAL BIAS RULE: You MUST err on the side of inclusion. Only exclude a guide if it is 100% irrelevant to the modified code. If there is any doubt, include the file.\n\nYou MUST respond with ONLY a JSON object, no other text. Example:\n```json\n{\"selected_prompts\": [\"networking.md\", \"locking.md\"]}\n```",
+            "You are an AI assistant preparing a Linux kernel patch review.\nReview the provided Patch and select all potentially relevant subsystem guides, code contexts, and API guides from the index below.\nCRITICAL BIAS RULE: You MUST err on the side of inclusion. Only exclude a guide if it is 100% irrelevant to the modified code. If there is any doubt, include the file.\n\nYou MUST respond with ONLY a JSON object, no other text. Example:\n```json\n{\"selected_prompts\": [\"networking.md\", \"locking.md\"], \"additional_contexts\": [], \"additional_apis\": []}\n```",
         ))
         .user_prompt(
             PromptTemplate::<LinuxPatchReviewState>::new(
-                "<subsystem_guide_index>\n@include(\"subsystem/subsystem.md\")\n</subsystem_guide_index>\n\n<patch>\n{{target_commit_diff}}\n</patch>",
+                "<subsystem_guide_index>\n@include(\"subsystem/subsystem.md\")@includes\n</subsystem_guide_index>{{deterministically_selected_block}}\n\n<patch>\n{{target_commit_diff}}\n</patch>",
             )
             .with_var("target_commit_diff", |s: &LinuxPatchReviewState| s.target_commit_diff.clone())
-            .include_file("subsystem/subsystem.md"),
+            .with_var("deterministically_selected_block", |s: &LinuxPatchReviewState| {
+                let mut already = Vec::new();
+                for p in s
+                    .selected_maintainer_notes
+                    .iter()
+                    .chain(s.selected_code_contexts.iter())
+                    .chain(s.selected_api_guides.iter())
+                {
+                    push_unique_string(&mut already, p);
+                }
+                if already.is_empty() {
+                    String::new()
+                } else {
+                    let list = already
+                        .iter()
+                        .map(|p| format!("- {p}"))
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    format!(
+                        "\n\n<already_selected_guides>\nThe following guides are already selected deterministically and do not need to be re-selected:\n{list}\n</already_selected_guides>"
+                    )
+                }
+            })
+            .include_file("subsystem/subsystem.md")
+            .include_files_from_state(|s: &LinuxPatchReviewState| {
+                vec![
+                    PathBuf::from("trees")
+                        .join(s.effective_tree_id())
+                        .join("index.md"),
+                ]
+            }),
         )
         .output_format(OutputFormat::json_with_schema(json!({
             "type": "object",
             "properties": {
                 "selected_prompts": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "additional_contexts": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "additional_apis": {
                     "type": "array",
                     "items": { "type": "string" }
                 }
@@ -1460,15 +1667,92 @@ pub fn prescreen_stage() -> Stage<LinuxPatchReviewState, PrescreenOutput> {
         })
         .skip_if(|s| s.manual_stages.is_some())
         .reduce(|state, out: PrescreenOutput| {
-            let prompts: Vec<String> = out
-                .selected_prompts
-                .into_iter()
-                .filter(|name| !is_stage_exclusive_guide(name))
-                .filter(|name| crate::workflows::guard::sanitize_guide_name(name))
-                .collect();
-            state.selected_guides = prompts;
-        })
+            let tid = state.effective_tree_id().to_string();
+            for raw in out.selected_prompts {
+                let trimmed = raw.trim();
+                let basename = trimmed.rsplit('/').next().unwrap_or(trimmed);
+                if is_stage_exclusive_guide(basename) {
+                    continue;
+                }
+                if trimmed.starts_with("contexts/") || trimmed.contains("/contexts/") {
+                    if let Some(norm) = crate::workflows::guard::normalize_tree_prompt_relpath(
+                        trimmed, &tid, "contexts",
+                    ) {
+                        push_unique_string(&mut state.selected_code_contexts, &norm);
+                    }
+                } else if trimmed.starts_with("apis/") || trimmed.contains("/apis/") {
+                    if let Some(norm) = crate::workflows::guard::normalize_tree_prompt_relpath(
+                        trimmed, &tid, "apis",
+                    ) {
+                        push_unique_string(&mut state.selected_api_guides, &norm);
+                    }
+                } else if trimmed.starts_with("maintainers/") {
+                    if crate::workflows::guard::sanitize_prompt_relpath(trimmed) {
+                        push_unique_string(&mut state.selected_maintainer_notes, trimmed);
+                    }
+                } else {
+                    // The guide index lists legacy guides by bare name, but a
+                    // model may echo the directory; both name the same guide.
+                    let bare = trimmed.strip_prefix("subsystem/").unwrap_or(trimmed);
+                    if crate::workflows::guard::sanitize_guide_name(bare) {
+                        push_unique_string(&mut state.selected_guides, bare);
+                        route_bare_guide_to_parts(state, &tid, bare);
+                    }
+                }
+            }
+            for raw in out.additional_contexts {
+                let name = raw.trim();
+                let basename = name.rsplit('/').next().unwrap_or(name);
+                if !is_stage_exclusive_guide(basename)
+                    && let Some(norm) = crate::workflows::guard::normalize_tree_prompt_relpath(
+                        name, &tid, "contexts",
+                    )
+                {
+                    push_unique_string(&mut state.selected_code_contexts, &norm);
+                }
+            }
+            for raw in out.additional_apis {
+                let name = raw.trim();
+                let basename = name.rsplit('/').next().unwrap_or(name);
+                if !is_stage_exclusive_guide(basename)
+                    && let Some(norm) =
+                        crate::workflows::guard::normalize_tree_prompt_relpath(name, &tid, "apis")
+                {
+                    push_unique_string(&mut state.selected_api_guides, &norm);
+                }
+            }
 
+            let (maint_inlined, maint_overflow) =
+                crate::tree_prompts::apply_part_budget_from_sizes(
+                    &state.guide_byte_sizes,
+                    &state.selected_maintainer_notes,
+                    crate::tree_prompts::MAX_MAINTAINER_NOTES_BYTES,
+                );
+            state.selected_maintainer_notes = maint_inlined;
+            for item in maint_overflow {
+                push_unique_string(&mut state.overflow_guides, &item);
+            }
+
+            let (ctx_inlined, ctx_overflow) = crate::tree_prompts::apply_part_budget_from_sizes(
+                &state.guide_byte_sizes,
+                &state.selected_code_contexts,
+                crate::tree_prompts::MAX_CODE_CONTEXTS_BYTES,
+            );
+            state.selected_code_contexts = ctx_inlined;
+            for item in ctx_overflow {
+                push_unique_string(&mut state.overflow_guides, &item);
+            }
+
+            let (api_inlined, api_overflow) = crate::tree_prompts::apply_part_budget_from_sizes(
+                &state.guide_byte_sizes,
+                &state.selected_api_guides,
+                crate::tree_prompts::MAX_API_GUIDES_BYTES,
+            );
+            state.selected_api_guides = api_inlined;
+            for item in api_overflow {
+                push_unique_string(&mut state.overflow_guides, &item);
+            }
+        })
         .build()
 }
 
@@ -1772,19 +2056,51 @@ fn analysis_stage(
     temperature: f32,
 ) -> Box<dyn ExecutableStage<LinuxPatchReviewState>> {
     let mut user_template = PromptTemplate::<LinuxPatchReviewState>::new(format!(
-        "{}\n\n{}{}",
+        "{}@includes_stage_guides\n\n{}{}",
         def.instruction,
         STAGE_JSON_SCHEMA_EXAMPLE,
         series_context_placeholder(def.wants_series_context)
     ));
     for guide in def.guides {
-        user_template = user_template.include_file(*guide);
+        if !guide.starts_with("subsystem/") {
+            user_template = user_template.include_file(*guide);
+        }
     }
+    let stage_guides = def.guides;
+    user_template = user_template.include_section_from_state(
+        "@includes_stage_guides",
+        move |s: &LinuxPatchReviewState| {
+            let tid = s.effective_tree_id();
+            let mut paths = Vec::new();
+            for guide in stage_guides {
+                if let Some(stem) = guide.strip_prefix("subsystem/") {
+                    if s.tree_id.trim().is_empty() {
+                        paths.push(PathBuf::from(*guide));
+                    } else {
+                        paths.push(PathBuf::from(format!("trees/{tid}/apis/{stem}")));
+                    }
+                }
+            }
+            paths
+        },
+        None,
+        |s, inner| {
+            let tid = s.effective_tree_id();
+            let ver = s.effective_kernel_version();
+            format!(
+                "\n\n<stage_review_guidelines tree=\"{tid}\" kernel_version=\"{ver}\">{inner}</stage_review_guidelines>"
+            )
+        },
+    );
     let user_template = with_series_context(user_template, def.wants_series_context);
+    let is_technical_stage = !matches!(def.name, "goal" | "implementation");
 
     Box::new(
         Stage::builder(def.name)
-            .system_prompt(linux_system_prompt(def.uses_commit_log))
+            .system_prompt(linux_system_prompt_for_stage(
+                def.uses_commit_log,
+                is_technical_stage,
+            ))
             .user_prompt(user_template)
             .output_format(
                 OutputFormat::json()
@@ -1801,8 +2117,8 @@ fn analysis_stage(
                 move |state: &mut LinuxPatchReviewState,
                       out: StageConcernsOutput,
                       outcome: &crate::workflow::stage::StageOutcome| {
-                    let prompts =
-                        collect_stage_prompts(&state.selected_guides, def.guides, outcome);
+                    let selected = state.all_selected_prompts();
+                    let prompts = collect_stage_prompts(&selected, def.guides, outcome);
                     append_stage_items_with_prompts(
                         &mut state.all_concerns,
                         &out.concerns,
@@ -1991,13 +2307,8 @@ pub fn apply_post_verification_stage_output(
     outcome: &crate::workflow::stage::StageOutcome,
     stage_lookup: fn(&str) -> Option<&'static AnalysisStage>,
 ) {
-    enrich_post_verification_output(
-        &state.selected_guides,
-        batch,
-        &mut out,
-        outcome,
-        stage_lookup,
-    );
+    let selected_prompts = state.all_selected_prompts();
+    enrich_post_verification_output(&selected_prompts, batch, &mut out, outcome, stage_lookup);
     for finding in &mut out.findings {
         let pv_idx = state.post_verification_findings.len().saturating_add(1);
         let pvf_id = format!("PVF{pv_idx}");
@@ -2216,7 +2527,8 @@ Example Output:
         .include_file("false-positive-guide.md")
         .include_file("severity.md")
         .include_files_from_state(move |s: &LinuxPatchReviewState| {
-            extra_prompt_paths_for_items(&s.selected_guides, &batch_for_prompts, analysis_stage_by_name)
+            let selected = s.all_selected_prompts();
+            extra_prompt_paths_for_items(&selected, &batch_for_prompts, analysis_stage_by_name)
         }),
         POST_VERIFICATION.wants_series_context,
     )
@@ -3694,5 +4006,154 @@ mod tests {
         assert_eq!(state.findings[1]["id"], "PVF1");
         assert_eq!(state.findings[0]["stage_item_id"], "VF1");
         assert_eq!(state.findings[1]["stage_item_id"], "PVF1");
+    }
+
+    #[tokio::test]
+    async fn test_prescreen_budgets_bare_legacy_guides() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join("subsystem")).unwrap();
+        std::fs::create_dir_all(root.join("maintainers")).unwrap();
+        std::fs::create_dir_all(root.join("trees/mainline/contexts")).unwrap();
+        std::fs::write(root.join("subsystem/legacy.md"), "LEGACY-ONLY-GUIDE").unwrap();
+        std::fs::write(root.join("subsystem/block.md"), "OLD-BLOCK-GUIDE").unwrap();
+        std::fs::write(root.join("maintainers/block.md"), "BLOCK-NOTES").unwrap();
+        let big = crate::tree_prompts::MAX_CODE_CONTEXTS_BYTES * 3;
+        std::fs::write(
+            root.join("trees/mainline/contexts/block.md"),
+            "x".repeat(big),
+        )
+        .unwrap();
+
+        let mut state = LinuxPatchReviewState {
+            tree_id: "mainline".to_string(),
+            guide_byte_sizes: std::collections::HashMap::from([
+                ("maintainers/block.md".to_string(), 11usize),
+                ("subsystem/block.md".to_string(), 15usize),
+                ("subsystem/legacy.md".to_string(), 17usize),
+                ("trees/mainline/contexts/block.md".to_string(), big),
+            ]),
+            ..Default::default()
+        };
+        let prescreen = prescreen_stage();
+        (prescreen.reducer)(
+            &mut state,
+            PrescreenOutput {
+                selected_prompts: vec!["block.md".to_string(), "subsystem/legacy.md".to_string()],
+                additional_contexts: vec![],
+                additional_apis: vec![],
+            },
+        );
+        assert_eq!(state.selected_guides, vec!["block.md", "legacy.md"]);
+        assert_eq!(
+            state.selected_maintainer_notes,
+            vec!["maintainers/block.md"]
+        );
+        assert_eq!(
+            state.selected_code_contexts,
+            vec!["trees/mainline/contexts/legacy.md"]
+        );
+        assert!(state.selected_api_guides.is_empty());
+        assert_eq!(
+            state.overflow_guides,
+            vec!["trees/mainline/contexts/block.md"]
+        );
+
+        // subsystem/ guides are never included directly: the legacy-only guide
+        // renders once inside the budgeted code_context section, and the
+        // superseded legacy block guide does not render at all.
+        let prompt = linux_system_prompt_for_stage(true, false)
+            .render_for_model(&state, root)
+            .await
+            .unwrap();
+        assert_eq!(prompt.matches("LEGACY-ONLY-GUIDE").count(), 1);
+        assert!(!prompt.contains("OLD-BLOCK-GUIDE"));
+        assert!(prompt.contains("BLOCK-NOTES"));
+    }
+
+    #[tokio::test]
+    async fn test_three_part_system_prompt_and_prescreen_reduction() {
+        let dir = tempfile::tempdir().unwrap();
+        let maint_dir = dir.path().join("maintainers");
+        let ctx_dir = dir.path().join("trees/linux-5.2.y/contexts");
+        let api_dir = dir.path().join("trees/linux-5.2.y/apis");
+        std::fs::create_dir_all(&maint_dir).unwrap();
+        std::fs::create_dir_all(&ctx_dir).unwrap();
+        std::fs::create_dir_all(&api_dir).unwrap();
+
+        std::fs::write(
+            maint_dir.join("networking.md"),
+            "# Networking Maintainers Notes\n\n## Evolution & Architectural Direction\n- Use netlink.\n\n## Coding Style & Conventions\n- Reverse Christmas Tree.\n",
+        )
+        .unwrap();
+        std::fs::write(
+            ctx_dir.join("networking-core.md"),
+            "# Networking Core (5.2)\n- sk_buff lifecycle.",
+        )
+        .unwrap();
+        std::fs::write(
+            api_dir.join("rcu.md"),
+            "# RCU API (5.2)\n- rcu_read_lock rules.",
+        )
+        .unwrap();
+
+        let mut state = LinuxPatchReviewState {
+            tree_id: "linux-5.2.y".to_string(),
+            kernel_version: "5.2".to_string(),
+            tree_version_note: Some("Using 5.2 snapshot for 5.3 baseline.".to_string()),
+            selected_maintainer_notes: vec!["maintainers/networking.md".to_string()],
+            overflow_guides: vec!["trees/linux-5.2.y/apis/timers.md".to_string()],
+            guide_byte_sizes: std::collections::HashMap::from([
+                ("maintainers/networking.md".to_string(), 120usize),
+                (
+                    "trees/linux-5.2.y/contexts/networking-core.md".to_string(),
+                    40usize,
+                ),
+                ("trees/linux-5.2.y/apis/rcu.md".to_string(), 40usize),
+            ]),
+            ..Default::default()
+        };
+
+        let prescreen = prescreen_stage();
+        (prescreen.reducer)(
+            &mut state,
+            PrescreenOutput {
+                selected_prompts: vec!["contexts/networking-core.md".to_string()],
+                additional_contexts: vec![],
+                additional_apis: vec!["rcu.md".to_string()],
+            },
+        );
+        assert_eq!(
+            state.selected_code_contexts,
+            vec!["trees/linux-5.2.y/contexts/networking-core.md"]
+        );
+        assert_eq!(
+            state.selected_api_guides,
+            vec!["trees/linux-5.2.y/apis/rcu.md"]
+        );
+
+        // Goal/implementation stage gets full maintainer notes (including Coding Style).
+        let full_prompt = linux_system_prompt_for_stage(true, false)
+            .render_for_model(&state, dir.path())
+            .await
+            .unwrap();
+        assert!(full_prompt.contains("<maintainer_notes>"));
+        assert!(full_prompt.contains("Reverse Christmas Tree."));
+        assert!(full_prompt.contains("<code_context tree=\"linux-5.2.y\" kernel_version=\"5.2\">"));
+        assert!(full_prompt.contains("sk_buff lifecycle."));
+        assert!(
+            full_prompt.contains("<kernel_api_rules tree=\"linux-5.2.y\" kernel_version=\"5.2\">")
+        );
+        assert!(full_prompt.contains("rcu_read_lock rules."));
+        assert!(full_prompt.contains("<tree_version_note>"));
+        assert!(full_prompt.contains("<additional_available_guides>"));
+
+        // Technical stage filters out Coding Style from maintainer notes.
+        let tech_prompt = linux_system_prompt_for_stage(false, true)
+            .render_for_model(&state, dir.path())
+            .await
+            .unwrap();
+        assert!(tech_prompt.contains("Use netlink."));
+        assert!(!tech_prompt.contains("Reverse Christmas Tree."));
     }
 }

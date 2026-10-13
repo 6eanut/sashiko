@@ -127,6 +127,123 @@ pub fn prompt_bundle_root() -> Result<PathBuf> {
         .join(PROMPT_BUNDLE_REVISION))
 }
 
+/// When `base_dir` points directly into a source checkout's `third_party/prompts/<proj>`
+/// or `prompts/<proj>` directory rather than the merged installed bundle, returns the
+/// sibling directory (`prompts/<proj>` or `third_party/prompts/<proj>`) via pure
+/// lexical path inspection without performing blocking filesystem syscalls.
+pub fn companion_prompt_dir(base_dir: &Path) -> Option<PathBuf> {
+    let proj_name = base_dir.file_name()?;
+    let parent = base_dir.parent()?;
+    if parent.file_name().is_some_and(|n| n == "prompts") {
+        let grandparent = parent.parent()?;
+        if grandparent.file_name().is_some_and(|n| n == "third_party") {
+            let repo_root = grandparent.parent()?;
+            return Some(repo_root.join("prompts").join(proj_name));
+        }
+        return Some(grandparent.join("third_party/prompts").join(proj_name));
+    }
+    None
+}
+
+/// Resolves `rel` under `base_dir`, falling back to `companion_prompt_dir(base_dir)`
+/// when `base_dir` points directly to a split source-tree prompt directory.
+pub fn resolve_in_prompt_dir(base_dir: &Path, rel: impl AsRef<Path>) -> PathBuf {
+    let rel = rel.as_ref();
+    let primary = base_dir.join(rel);
+    if primary.exists() {
+        return primary;
+    }
+    let companion = companion_prompt_dir(base_dir);
+    if let Some(ref comp) = companion {
+        let secondary = comp.join(rel);
+        if secondary.exists() {
+            return secondary;
+        }
+    }
+    if let Some(rel_str) = rel.to_str()
+        && rel_str.starts_with("trees/")
+        && (rel_str.contains("/apis/") || rel_str.contains("/contexts/"))
+        && let Some(fname) = rel.file_name()
+    {
+        let legacy_rel = Path::new("subsystem").join(fname);
+        let legacy_primary = base_dir.join(&legacy_rel);
+        if legacy_primary.exists() {
+            return legacy_primary;
+        }
+        if let Some(ref comp) = companion {
+            let legacy_secondary = comp.join(&legacy_rel);
+            if legacy_secondary.exists() {
+                return legacy_secondary;
+            }
+        }
+    }
+    primary
+}
+
+/// Reports whether `path` exists without blocking a Tokio worker thread.
+///
+/// A missing path or a missing parent directory is a normal "absent"
+/// answer. Any other failure (permission denied, descriptor exhaustion,
+/// I/O error) is returned so callers never mistake an unreadable guide
+/// for an absent one and silently drop it from a prompt.
+pub async fn path_exists_async(path: &Path) -> std::io::Result<bool> {
+    match tokio::fs::try_exists(path).await {
+        Ok(exists) => Ok(exists),
+        Err(e)
+            if matches!(
+                e.kind(),
+                std::io::ErrorKind::NotFound | std::io::ErrorKind::NotADirectory
+            ) =>
+        {
+            Ok(false)
+        }
+        Err(e) => Err(std::io::Error::new(
+            e.kind(),
+            format!("failed to check prompt path {}: {e}", path.display()),
+        )),
+    }
+}
+
+/// Async counterpart of [`resolve_in_prompt_dir`] using `tokio::fs::try_exists`
+/// so prompt rendering never performs blocking filesystem metadata checks on
+/// Tokio worker threads. Existence checks that fail for reasons other than
+/// absence are propagated as errors.
+pub async fn resolve_in_prompt_dir_async(
+    base_dir: &Path,
+    rel: impl AsRef<Path>,
+) -> std::io::Result<PathBuf> {
+    let rel = rel.as_ref();
+    let primary = base_dir.join(rel);
+    if path_exists_async(&primary).await? {
+        return Ok(primary);
+    }
+    let companion = companion_prompt_dir(base_dir);
+    if let Some(ref comp) = companion {
+        let secondary = comp.join(rel);
+        if path_exists_async(&secondary).await? {
+            return Ok(secondary);
+        }
+    }
+    if let Some(rel_str) = rel.to_str()
+        && rel_str.starts_with("trees/")
+        && (rel_str.contains("/apis/") || rel_str.contains("/contexts/"))
+        && let Some(fname) = rel.file_name()
+    {
+        let legacy_rel = Path::new("subsystem").join(fname);
+        let legacy_primary = base_dir.join(&legacy_rel);
+        if path_exists_async(&legacy_primary).await? {
+            return Ok(legacy_primary);
+        }
+        if let Some(ref comp) = companion {
+            let legacy_secondary = comp.join(&legacy_rel);
+            if path_exists_async(&legacy_secondary).await? {
+                return Ok(legacy_secondary);
+            }
+        }
+    }
+    Ok(primary)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -236,7 +353,6 @@ mod tests {
             );
         }
     }
-
     #[test]
     fn test_project_prompts_path_with_overlay() {
         let temp = tempfile::tempdir().unwrap();
@@ -251,5 +367,99 @@ mod tests {
             project_prompts_path_with_overlay(ProjectId::Linux, Some(&kernel_sub)).unwrap(),
             kernel_sub
         );
+    }
+
+    #[test]
+    fn test_companion_prompt_dir_and_resolve_in_prompt_dir() {
+        let temp = tempfile::tempdir().unwrap();
+        let vendored_kernel = temp.path().join("third_party/prompts/kernel");
+        let root_kernel = temp.path().join("prompts/kernel");
+        std::fs::create_dir_all(vendored_kernel.join("subsystem")).unwrap();
+        std::fs::create_dir_all(root_kernel.join("maintainers")).unwrap();
+        std::fs::write(vendored_kernel.join("review-core.md"), "core").unwrap();
+        std::fs::write(vendored_kernel.join("subsystem/locking.md"), "locking").unwrap();
+        std::fs::write(root_kernel.join("maintainers/index.json"), "{}").unwrap();
+
+        assert_eq!(
+            companion_prompt_dir(&vendored_kernel),
+            Some(root_kernel.clone())
+        );
+        assert_eq!(
+            companion_prompt_dir(&root_kernel),
+            Some(vendored_kernel.clone())
+        );
+        assert_eq!(companion_prompt_dir(temp.path()), None);
+
+        assert_eq!(
+            resolve_in_prompt_dir(&vendored_kernel, "maintainers/index.json"),
+            root_kernel.join("maintainers/index.json")
+        );
+        assert_eq!(
+            resolve_in_prompt_dir(&root_kernel, "review-core.md"),
+            vendored_kernel.join("review-core.md")
+        );
+        assert_eq!(
+            resolve_in_prompt_dir(&root_kernel, "trees/mainline/apis/locking.md"),
+            vendored_kernel.join("subsystem/locking.md")
+        );
+    }
+
+    #[test]
+    fn test_kernel_prompt_bundle_integrity() {
+        let required_files = ["kernel/review-core.md", "kernel/severity.md"];
+        for path in required_files {
+            assert!(
+                PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == path),
+                "missing kernel prompt file in bundle: {path}"
+            );
+        }
+
+        if let Some(maint_json) = PROMPT_BUNDLE_FILES
+            .iter()
+            .find(|(p, _)| *p == "kernel/maintainers/index.json")
+            .and_then(|(_, bytes)| std::str::from_utf8(bytes).ok())
+        {
+            let maint_index: crate::tree_prompts::MaintainerNotesIndex =
+                serde_json::from_str(maint_json).expect("valid MaintainerNotesIndex JSON");
+            for entry in &maint_index.entries {
+                let expected = format!("kernel/maintainers/{}", entry.file);
+                assert!(
+                    PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
+                    "maintainer note {expected} missing from bundle"
+                );
+            }
+        }
+
+        if let Some(contexts_json) = PROMPT_BUNDLE_FILES
+            .iter()
+            .find(|(p, _)| *p == "kernel/trees/mainline/contexts_index.json")
+            .and_then(|(_, bytes)| std::str::from_utf8(bytes).ok())
+        {
+            let contexts_index: crate::tree_prompts::CodeContextsIndex =
+                serde_json::from_str(contexts_json).expect("valid CodeContextsIndex JSON");
+            for entry in &contexts_index.entries {
+                let expected = format!("kernel/trees/mainline/contexts/{}", entry.file);
+                assert!(
+                    PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
+                    "code context {expected} missing from bundle"
+                );
+            }
+        }
+
+        if let Some(apis_json) = PROMPT_BUNDLE_FILES
+            .iter()
+            .find(|(p, _)| *p == "kernel/trees/mainline/apis_index.json")
+            .and_then(|(_, bytes)| std::str::from_utf8(bytes).ok())
+        {
+            let apis_index: crate::tree_prompts::ApiGuidesIndex =
+                serde_json::from_str(apis_json).expect("valid ApiGuidesIndex JSON");
+            for entry in &apis_index.entries {
+                let expected = format!("kernel/trees/mainline/apis/{}", entry.file);
+                assert!(
+                    PROMPT_BUNDLE_FILES.iter().any(|(p, _)| *p == expected),
+                    "API guide {expected} missing from bundle"
+                );
+            }
+        }
     }
 }

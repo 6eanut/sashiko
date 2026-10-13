@@ -169,7 +169,7 @@ pub fn is_safe_git_revision(rev: &str) -> bool {
 
 /// Discovers all snapshot subdirectories under `<prompts_root>/trees/`.
 pub fn discover_tree_snapshots(prompts_root: &Path) -> Vec<AvailableTreeSnapshot> {
-    let trees_dir = prompts_root.join("trees");
+    let trees_dir = crate::prompt_bundle::resolve_in_prompt_dir(prompts_root, "trees");
     let Ok(read_dir) = std::fs::read_dir(&trees_dir) else {
         return Vec::new();
     };
@@ -694,22 +694,22 @@ pub fn resolve_deterministic_prompts(
         Vec::new()
     };
 
-    let maint_index: MaintainerNotesIndex =
-        load_optional_json(&prompts_root.join("maintainers/index.json"))?.unwrap_or_default();
-    let contexts_index: CodeContextsIndex = load_optional_json(
-        &prompts_root
-            .join("trees")
-            .join(tree_id)
-            .join("contexts_index.json"),
+    let maint_index: MaintainerNotesIndex = load_optional_json(
+        &crate::prompt_bundle::resolve_in_prompt_dir(prompts_root, "maintainers/index.json"),
     )?
     .unwrap_or_default();
-    let apis_index: ApiGuidesIndex = load_optional_json(
-        &prompts_root
-            .join("trees")
-            .join(tree_id)
-            .join("apis_index.json"),
-    )?
-    .unwrap_or_default();
+    let contexts_index: CodeContextsIndex =
+        load_optional_json(&crate::prompt_bundle::resolve_in_prompt_dir(
+            prompts_root,
+            Path::new("trees").join(tree_id).join("contexts_index.json"),
+        ))?
+        .unwrap_or_default();
+    let apis_index: ApiGuidesIndex =
+        load_optional_json(&crate::prompt_bundle::resolve_in_prompt_dir(
+            prompts_root,
+            Path::new("trees").join(tree_id).join("apis_index.json"),
+        ))?
+        .unwrap_or_default();
 
     Ok(DeterministicPromptMatches {
         maintainer_notes: match_maintainer_notes(&maint_index, &touched_files, &matched_sections),
@@ -743,7 +743,7 @@ pub fn apply_part_budget_from_sizes(
         if !sanitize_prompt_relpath(rel) {
             continue;
         }
-        let Some(len) = guide_sizes.get(rel.as_str()).copied() else {
+        let Some(len) = guide_size(guide_sizes, rel) else {
             overflow.push(rel.clone());
             continue;
         };
@@ -760,6 +760,177 @@ pub fn apply_part_budget_from_sizes(
     (inlined, overflow)
 }
 
+/// Budget-partitioned three-part prompt selection (`inlined` per part + combined `overflow`).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct BudgetedPromptSelection {
+    pub maintainer_notes: Vec<String>,
+    pub code_contexts: Vec<String>,
+    pub api_guides: Vec<String>,
+    pub overflow_guides: Vec<String>,
+    pub guide_byte_sizes: std::collections::HashMap<String, usize>,
+}
+
+/// Maximum subdirectory depth scanned below each guide directory when sizing
+/// guides, bounding the walk while still covering nested guides such as
+/// `trees/<tree>/contexts/net/core.md`.
+const MAX_GUIDE_SCAN_DEPTH: usize = 4;
+
+/// Records the byte size of every regular `.md` file below `dir` into `sizes`
+/// keyed by its prompt-relative path (`rel_dir/...`). Existing keys win, so
+/// callers scan higher-precedence roots first. Symlinks are skipped. A missing
+/// directory is normal; any other read failure is logged, and guides it hides
+/// stay unsized, which [`apply_part_budget_from_sizes`] treats as overflow.
+fn record_guide_sizes(
+    dir: &Path,
+    rel_dir: &str,
+    depth_remaining: usize,
+    sizes: &mut std::collections::HashMap<String, usize>,
+) {
+    let entries = match std::fs::read_dir(dir) {
+        Ok(entries) => entries,
+        Err(e)
+            if matches!(
+                e.kind(),
+                std::io::ErrorKind::NotFound | std::io::ErrorKind::NotADirectory
+            ) =>
+        {
+            return;
+        }
+        Err(e) => {
+            tracing::warn!(
+                "failed to scan prompt guide directory {}: {e}",
+                dir.display()
+            );
+            return;
+        }
+    };
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(e) => {
+                tracing::warn!("failed to read entry in {}: {e}", dir.display());
+                continue;
+            }
+        };
+        let Some(name) = entry.file_name().to_str().map(str::to_owned) else {
+            continue;
+        };
+        let path = entry.path();
+        let meta = match std::fs::symlink_metadata(&path) {
+            Ok(meta) => meta,
+            Err(e) => {
+                tracing::warn!("failed to stat prompt guide {}: {e}", path.display());
+                continue;
+            }
+        };
+        if meta.file_type().is_symlink() {
+            continue;
+        }
+        let rel = format!("{rel_dir}/{name}");
+        if meta.is_dir() {
+            if depth_remaining > 0 {
+                record_guide_sizes(&path, &rel, depth_remaining - 1, sizes);
+            }
+        } else if meta.is_file() && name.ends_with(".md") {
+            sizes
+                .entry(rel)
+                .or_insert_with(|| usize::try_from(meta.len()).unwrap_or(usize::MAX));
+        }
+    }
+}
+
+/// Sizes every guide the budget may be asked about, mirroring the lookup
+/// precedence of [`crate::prompt_bundle::resolve_in_prompt_dir`]: the primary
+/// prompt directory, then its companion directory. Flat legacy `subsystem/`
+/// guides are sized under their own `subsystem/<file>` keys rather than
+/// aliased as tree guides, so a bare legacy name never also reads as a
+/// tree-scoped guide and gets included twice; [`guide_size`] applies the
+/// legacy fallback when budgeting a tree-scoped name.
+fn collect_guide_byte_sizes(
+    prompts_root: &Path,
+    tree_id: &str,
+) -> std::collections::HashMap<String, usize> {
+    let mut sizes = std::collections::HashMap::new();
+    let roots: Vec<std::path::PathBuf> = std::iter::once(prompts_root.to_path_buf())
+        .chain(crate::prompt_bundle::companion_prompt_dir(prompts_root))
+        .collect();
+    let rel_dirs = [
+        "maintainers".to_string(),
+        format!("trees/{tree_id}/contexts"),
+        format!("trees/{tree_id}/apis"),
+    ];
+    for root in &roots {
+        for rel_dir in &rel_dirs {
+            record_guide_sizes(
+                &root.join(rel_dir),
+                rel_dir,
+                MAX_GUIDE_SCAN_DEPTH,
+                &mut sizes,
+            );
+        }
+    }
+
+    for root in &roots {
+        record_guide_sizes(&root.join("subsystem"), "subsystem", 0, &mut sizes);
+    }
+    sizes
+}
+
+/// Looks up the byte size of guide `rel` the way the renderer resolves it: an
+/// exact entry first, then, for a tree-scoped context or API guide, the flat
+/// legacy `subsystem/<file name>` entry that
+/// [`crate::prompt_bundle::resolve_in_prompt_dir`] falls back to.
+fn guide_size(sizes: &std::collections::HashMap<String, usize>, rel: &str) -> Option<usize> {
+    if let Some(len) = sizes.get(rel) {
+        return Some(*len);
+    }
+    if rel.starts_with("trees/") && (rel.contains("/apis/") || rel.contains("/contexts/")) {
+        let fname = rel.rsplit('/').next()?;
+        return sizes.get(&format!("subsystem/{fname}")).copied();
+    }
+    None
+}
+
+/// Runs deterministic three-part matching and byte-budget partitioning on the
+/// blocking thread pool so synchronous `MAINTAINERS` and index file I/O does
+/// not stall Tokio async worker threads.
+pub async fn resolve_deterministic_prompts_and_budget(
+    prompts_root: &Path,
+    worktree_path: &Path,
+    tree_id: &str,
+    diff: &str,
+) -> anyhow::Result<BudgetedPromptSelection> {
+    use anyhow::Context;
+    let root_buf = prompts_root.to_path_buf();
+    let wt_buf = worktree_path.to_path_buf();
+    let tid = tree_id.to_string();
+    let diff_owned = diff.to_string();
+
+    tokio::task::spawn_blocking(move || -> anyhow::Result<BudgetedPromptSelection> {
+        let det = resolve_deterministic_prompts(&root_buf, &wt_buf, &tid, &diff_owned)?;
+        let guide_byte_sizes = collect_guide_byte_sizes(&root_buf, &tid);
+        let (maint_inlined, maint_overflow) =
+            apply_part_budget(&root_buf, &det.maintainer_notes, MAX_MAINTAINER_NOTES_BYTES);
+        let (ctx_inlined, ctx_overflow) =
+            apply_part_budget(&root_buf, &det.code_contexts, MAX_CODE_CONTEXTS_BYTES);
+        let (api_inlined, api_overflow) =
+            apply_part_budget(&root_buf, &det.api_guides, MAX_API_GUIDES_BYTES);
+        let mut overflow = Vec::new();
+        overflow.extend(maint_overflow);
+        overflow.extend(ctx_overflow);
+        overflow.extend(api_overflow);
+        Ok(BudgetedPromptSelection {
+            maintainer_notes: maint_inlined,
+            code_contexts: ctx_inlined,
+            api_guides: api_inlined,
+            overflow_guides: overflow,
+            guide_byte_sizes,
+        })
+    })
+    .await
+    .context("Deterministic prompt resolution task panicked")?
+}
+
 /// Partitions `candidates` into `(inlined, overflow)` according to `max_bytes`.
 pub fn apply_part_budget(
     prompts_root: &Path,
@@ -774,7 +945,7 @@ pub fn apply_part_budget(
         if !sanitize_prompt_relpath(rel) {
             continue;
         }
-        let full = prompts_root.join(rel);
+        let full = crate::prompt_bundle::resolve_in_prompt_dir(prompts_root, rel);
         let Ok(meta) = std::fs::symlink_metadata(&full) else {
             continue;
         };
@@ -1073,6 +1244,45 @@ index 1111111..2222222 100644
         let (inlined, overflow) = apply_part_budget_from_sizes(&sizes, &candidates, 150);
         assert_eq!(inlined, vec!["maintainers/a.md"]);
         assert_eq!(overflow, vec!["maintainers/unknown.md", "maintainers/b.md"]);
+    }
+
+    #[test]
+    fn test_collect_guide_byte_sizes_covers_nested_companion_and_legacy() {
+        let repo = tempdir().unwrap();
+        let primary = repo.path().join("third_party/prompts/kernel");
+        let companion = repo.path().join("prompts/kernel");
+        std::fs::create_dir_all(primary.join("subsystem")).unwrap();
+        std::fs::create_dir_all(primary.join("maintainers")).unwrap();
+        std::fs::create_dir_all(companion.join("maintainers")).unwrap();
+        std::fs::create_dir_all(companion.join("trees/mainline/contexts/net")).unwrap();
+        std::fs::create_dir_all(companion.join("trees/mainline/apis")).unwrap();
+
+        std::fs::write(primary.join("maintainers/mm.md"), "p".repeat(10)).unwrap();
+        std::fs::write(companion.join("maintainers/mm.md"), "c".repeat(20)).unwrap();
+        std::fs::write(companion.join("maintainers/net.md"), "n".repeat(30)).unwrap();
+        std::fs::write(
+            companion.join("trees/mainline/contexts/net/core.md"),
+            "x".repeat(40),
+        )
+        .unwrap();
+        std::fs::write(companion.join("trees/mainline/apis/rcu.md"), "r".repeat(50)).unwrap();
+        std::fs::write(primary.join("subsystem/rcu.md"), "l".repeat(60)).unwrap();
+        std::fs::write(primary.join("subsystem/block.md"), "b".repeat(70)).unwrap();
+
+        let sizes = collect_guide_byte_sizes(&primary, "mainline");
+        assert_eq!(sizes.get("maintainers/mm.md"), Some(&10));
+        assert_eq!(sizes.get("maintainers/net.md"), Some(&30));
+        assert_eq!(sizes.get("trees/mainline/contexts/net/core.md"), Some(&40));
+        assert_eq!(sizes.get("trees/mainline/apis/rcu.md"), Some(&50));
+        assert_eq!(sizes.get("subsystem/rcu.md"), Some(&60));
+        assert_eq!(sizes.get("trees/mainline/contexts/rcu.md"), None);
+        assert_eq!(guide_size(&sizes, "trees/mainline/apis/rcu.md"), Some(50));
+        assert_eq!(
+            guide_size(&sizes, "trees/mainline/contexts/rcu.md"),
+            Some(60)
+        );
+        assert_eq!(guide_size(&sizes, "trees/mainline/apis/block.md"), Some(70));
+        assert_eq!(guide_size(&sizes, "maintainers/block.md"), None);
     }
 
     #[tokio::test]
