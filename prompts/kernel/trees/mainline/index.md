@@ -26,6 +26,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | ARM64 Hyp (EL2 / pKVM / nVHE) | `arch/arm64/kvm/hyp/`, `pkvm_`, `__pkvm_`, `kern_hyp_va`, `hyp_pool`, `hyp_fixmap_`, `hyp_vmemmap`, `flush_hyp_vcpu` | `contexts/hyp-arm64.md` |
 | I2C Subsystem | `drivers/i2c/`, `include/linux/i2c.h`, `i2c_client`, `i2c_adapter` | `contexts/i2c.md` |
 | Input Subsystem | `drivers/input/`, `include/linux/input.h`, `input_dev`, `input_handler`, `evdev` | `contexts/input.md` |
+| io_uring | `io_uring/`, `io_uring_`, `io_ring_`, `io_sq_`, `io_cq_`, `io_wq_`, `io_kiocb`, `IORING_` | `contexts/io_uring.md` |
 
 ## Kernel API Guides (`apis/`)
 
