@@ -474,6 +474,28 @@
         "free_slab_obj_exts",
         "pcp_spin_"
       ]
+    },
+    {
+      "file": "mm-folio.md",
+      "covered_paths": [
+        "mm/filemap.c",
+        "mm/swap.c",
+        "mm/truncate.c",
+        "mm/rmap.c",
+        "mm/compaction.c",
+        "mm/workingset.c"
+      ],
+      "triggers": [
+        "mm/filemap.c",
+        "mm/swap.c",
+        "mm/truncate.c",
+        "page_folio",
+        "compound_head",
+        "filemap_",
+        "mapping_set_update",
+        "folio_set_swapbacked",
+        "pfn_to_online_page"
+      ]
     }
   ]
 }

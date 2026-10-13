@@ -35,6 +35,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Media / V4L2 Subdevice Core | `drivers/media/`, `include/media/`, `v4l2_subdev_`, `V4L2_SUBDEV_`, `MEDIA_BUS_FMT_` | `contexts/media.md` |
 | MIPS Architecture | `arch/mips/`, `tlb_probe`, `tlb_read`, `tlb_write_indexed`, `write_c0_entryhi`, `TLBP`, `TLBR`, `TLBWI` | `contexts/mips.md` |
 | MM Page Allocator, SLUB & vmalloc | `mm/page_alloc.c`, `mm/slub.c`, `mm/vmalloc.c`, `get_page_from_freelist`, `lowmem_reserve`, `allocate_slab`, `pcp_spin_` | `contexts/mm-alloc.md` |
+| MM Folio Lifecycle & Page Cache | `mm/filemap.c`, `mm/swap.c`, `mm/truncate.c`, `page_folio`, `filemap_`, `mapping_set_update`, `folio_set_swapbacked`, `pfn_to_online_page` | `contexts/mm-folio.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -59,3 +60,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Kernel Locking & Memory Ordering | `spin_lock*`, `raw_spin_lock*`, `local_lock`, `mutex_*`, `rwsem*`, `seqlock*`, `seqcount*`, `lockdep_pin_lock`, `cpus_read_lock`, `smp_store_release`, `smp_load_acquire` | `apis/locking.md` |
 | Multi-Function Device (MFD) API | `mfd_add_devices`, `devm_mfd_add_devices`, `mfd_remove_devices`, `mfd_cell`, `PLATFORM_DEVID_AUTO` | `apis/mfd.md` |
 | Memory Allocation, GFP & Slab API | `alloc_pages`, `__GFP_*`, `kmalloc`, `kzalloc`, `kmem_cache_*`, `vmalloc`, `mempool_alloc`, `memblock_*`, `gfpflags_allow_blocking`, `ARCH_KMALLOC_MINALIGN` | `apis/mm-alloc.md` |
+| Folio, Page Cache & XArray API | `folio_*`, `page_folio`, `folio_expected_ref_count`, `folio_end_read`, `kmap_local_folio`, `find_get_entries`, `xas_next`, `xas_advance`, `xa_get_order` | `apis/mm-folio.md` |

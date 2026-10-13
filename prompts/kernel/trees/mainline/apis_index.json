@@ -455,6 +455,41 @@
           "kmem_cache_"
         ]
       }
+    },
+    {
+      "file": "mm-folio.md",
+      "defining_files": [
+        "include/linux/mm.h",
+        "include/linux/pagemap.h",
+        "include/linux/xarray.h",
+        "include/linux/highmem.h"
+      ],
+      "symbols": {
+        "exact": [
+          "page_folio",
+          "compound_head",
+          "folio_expected_ref_count",
+          "folio_ref_count",
+          "folio_mapcount",
+          "folio_lock",
+          "folio_trylock",
+          "folio_end_read",
+          "folio_put_testzero",
+          "folio_page",
+          "kmap_local_page",
+          "kmap_local_folio",
+          "find_get_entries",
+          "find_lock_entries",
+          "xas_next",
+          "xas_advance",
+          "xa_get_order"
+        ],
+        "prefixes": [
+          "folio_",
+          "filemap_",
+          "xas_"
+        ]
+      }
     }
   ]
 }
