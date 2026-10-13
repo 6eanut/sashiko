@@ -667,6 +667,23 @@
         "msi-map",
         "msi-parent"
       ]
+    },
+    {
+      "file": "perf.md",
+      "covered_paths": [
+        "tools/perf/"
+      ],
+      "triggers": [
+        "tools/perf/",
+        "perf_tool",
+        "perf_env",
+        "DECLARE_RC_STRUCT",
+        "thread__get",
+        "thread__put",
+        "maps__get",
+        "dso__get",
+        "fdopendir"
+      ]
     }
   ]
 }

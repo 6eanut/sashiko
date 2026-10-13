@@ -198,6 +198,16 @@
         "include/linux/pci-epc.h",
         "include/linux/pci-epf.h"
       ]
+    },
+    {
+      "file": "perf.md",
+      "sections": [
+        "PERFORMANCE EVENTS SUBSYSTEM",
+        "PERFORMANCE EVENTS TOOLING ARM64"
+      ],
+      "paths": [
+        "tools/perf/"
+      ]
     }
   ]
 }

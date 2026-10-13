@@ -44,6 +44,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | NFS Server (NFSD) Subsystem | `fs/nfsd/`, `fs/lockd/`, `fh_verify`, `nfsd4_`, `nfs4_stid`, `nfs4_preprocess_stateid_op`, `nfsd_user_namespace`, `nfserrno` | `contexts/nfsd.md` |
 | Objtool Control-Flow Validation | `tools/objtool/`, `INSN_BUG`, `INSN_TRAP`, `decode.c`, `validate_sls`, `ignore_unreachable_insn` | `contexts/objtool.md` |
 | Open Firmware (DT) Core & MSI | `drivers/of/`, `of_msi_xlate`, `of_msi_get_domain`, `msi-map`, `msi-parent` | `contexts/of.md` |
+| Perf Tools (`tools/perf/`) | `tools/perf/`, `perf_tool`, `perf_env`, `DECLARE_RC_STRUCT`, `thread__get`, `maps__get`, `fdopendir` | `contexts/perf.md` |
 
 ## Kernel API Guides (`apis/`)
 
