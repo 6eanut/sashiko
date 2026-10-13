@@ -42,6 +42,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | MM VMA Internals | `mm/vma.c`, `mm/mmap.c`, `mm/mmap_lock.c`, `lock_vma_under_rcu`, `vma_prepare`, `vma_complete`, `vma_modify`, `vma_merge_`, `call_mmap_prepare` | `contexts/mm-vma.md` |
 | Networking Core Packet Flow & XFRM | `net/core/`, `net/xfrm/`, `skb->cb`, `destructor_arg`, `xfrm_state`, `inner_mode`, `virtio_net_hdr`, `PACKET_*` | `contexts/networking-core.md` |
 | NFS Server (NFSD) Subsystem | `fs/nfsd/`, `fs/lockd/`, `fh_verify`, `nfsd4_`, `nfs4_stid`, `nfs4_preprocess_stateid_op`, `nfsd_user_namespace`, `nfserrno` | `contexts/nfsd.md` |
+| Objtool Control-Flow Validation | `tools/objtool/`, `INSN_BUG`, `INSN_TRAP`, `decode.c`, `validate_sls`, `ignore_unreachable_insn` | `contexts/objtool.md` |
 
 ## Kernel API Guides (`apis/`)
 

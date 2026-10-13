@@ -639,6 +639,20 @@
         "release_openowner",
         "nfserrno"
       ]
+    },
+    {
+      "file": "objtool.md",
+      "covered_paths": [
+        "tools/objtool/"
+      ],
+      "triggers": [
+        "tools/objtool/",
+        "INSN_BUG",
+        "INSN_TRAP",
+        "validate_retpoline",
+        "validate_sls",
+        "ignore_unreachable_insn"
+      ]
     }
   ]
 }
