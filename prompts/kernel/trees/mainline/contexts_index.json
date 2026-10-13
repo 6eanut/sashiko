@@ -572,6 +572,32 @@
         "TTU_RMAP_LOCKED",
         "shmem_swaplist"
       ]
+    },
+    {
+      "file": "mm-vma.md",
+      "covered_paths": [
+        "mm/vma.c",
+        "mm/vma.h",
+        "mm/vma_init.c",
+        "mm/mmap.c",
+        "mm/mmap_lock.c",
+        "mm/madvise.c",
+        "mm/khugepaged.c"
+      ],
+      "triggers": [
+        "mm/vma.c",
+        "mm/mmap.c",
+        "mm/mmap_lock.c",
+        "lock_vma_under_rcu",
+        "vma_start_read",
+        "vma_prepare",
+        "vma_complete",
+        "vma_modify",
+        "vma_merge_",
+        "call_mmap_prepare",
+        "check_pmd_still_valid",
+        "MM_STRUCT_FLEXIBLE_ARRAY_INIT"
+      ]
     }
   ]
 }

@@ -600,6 +600,45 @@
           "mem_cgroup_"
         ]
       }
+    },
+    {
+      "file": "mm-vma.md",
+      "defining_files": [
+        "include/linux/mm.h",
+        "include/linux/mmap_lock.h",
+        "include/linux/vmalloc.h",
+        "include/linux/memfd.h",
+        "include/linux/security.h"
+      ],
+      "symbols": {
+        "exact": [
+          "vma_is_anonymous",
+          "vma_set_anonymous",
+          "vma_desc_set_anonymous",
+          "vm_flags_set",
+          "vm_flags_reset",
+          "vm_flags_init",
+          "vm_flags_clear",
+          "vm_flags_mod",
+          "vma_start_write",
+          "mmap_read_lock_killable",
+          "mmap_write_lock_killable",
+          "vma_assert_locked",
+          "mmap_assert_locked",
+          "vma_interval_tree_foreach",
+          "vma_address",
+          "find_vm_area",
+          "remap_vmalloc_range_partial",
+          "memfd_alloc_file",
+          "security_vm_enough_memory_mm",
+          "vm_unacct_memory"
+        ],
+        "prefixes": [
+          "vm_flags_",
+          "mmap_read_lock",
+          "mmap_write_lock"
+        ]
+      }
     }
   ]
 }
