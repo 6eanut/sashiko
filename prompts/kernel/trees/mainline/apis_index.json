@@ -157,6 +157,35 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "gpio.md",
+      "defining_files": [
+        "include/linux/gpio/consumer.h",
+        "include/linux/gpio/driver.h",
+        "include/linux/gpio/generic.h",
+        "include/linux/gpio/regmap.h",
+        "include/linux/gpio.h"
+      ],
+      "symbols": {
+        "exact": [
+          "gpio_get_value",
+          "gpio_set_value",
+          "gpio_get_value_cansleep",
+          "gpio_set_value_cansleep",
+          "gpiod_get_raw_value",
+          "gpiod_set_raw_value",
+          "gpiod_get_raw_value_cansleep",
+          "gpiod_set_raw_value_cansleep",
+          "gpio_chip",
+          "GPIO_GENERIC",
+          "GPIO_REGMAP",
+          "of_gpio_try_fixup_polarity"
+        ],
+        "prefixes": [
+          "gpiochip_"
+        ]
+      }
     }
   ]
 }

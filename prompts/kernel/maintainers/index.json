@@ -65,6 +65,17 @@
       "paths": [
         "Documentation/devicetree/bindings/"
       ]
+    },
+    {
+      "file": "gpio.md",
+      "sections": [
+        "GPIO SUBSYSTEM"
+      ],
+      "paths": [
+        "drivers/gpio/",
+        "include/linux/gpio/",
+        "include/linux/gpio.h"
+      ]
     }
   ]
 }

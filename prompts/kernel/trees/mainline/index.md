@@ -34,3 +34,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | BTF Map Field Helpers | `check_and_init_map_value`, `bpf_obj_cancel_fields`, `bpf_obj_free_fields`, `copy_map_value` | `apis/btf.md` |
 | Cleanup & Guard API | `__free`, `guard`, `scoped_guard`, `DEFINE_FREE`, `DEFINE_GUARD`, `no_free_ptr`, `return_ptr`, `retain_and_null_ptr` | `apis/cleanup.md` |
 | DRM, Overflow & fwnode APIs | `struct_size`, `fwnode_create_software_node`, `stack_depot_save`, `xe_device_get_gt`, `msm_context_vm`, `amdgpu_bo_create_kernel`, `intel_cx0_rmw` | `apis/drm.md` |
+| GPIO Consumer & Driver API | `linux/gpio.h`, `gpio_get_value`, `gpio_set_value`, `gpiod_get_raw_value`, `gpiod_set_raw_value`, `gpio_chip`, `GPIO_GENERIC`, `GPIO_REGMAP` | `apis/gpio.md` |
