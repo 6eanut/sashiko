@@ -17,7 +17,6 @@ and symbols regexes.
 
 | Subsystem | Triggers | File |
 |-----------|----------|------|
-| Networking Core | net/, skb_, sockets, xfrm, dst_, sock_put, release_sock, pskb_may_pull, SNMP_*_STATS | networking-core.md |
 | Networking Drivers | drivers/net/, ethtool_ops, net_device_ops | networking-drivers.md |
 | VFS | inode, dentry, vfs_, fs/*.c | vfs.md |
 | Scheduler | kernel/sched/, sched_, schedule, *wakeup* | scheduler.md |

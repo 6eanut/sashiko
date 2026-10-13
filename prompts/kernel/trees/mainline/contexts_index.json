@@ -598,6 +598,29 @@
         "check_pmd_still_valid",
         "MM_STRUCT_FLEXIBLE_ARRAY_INIT"
       ]
+    },
+    {
+      "file": "networking-core.md",
+      "covered_paths": [
+        "net/core/",
+        "net/ipv4/",
+        "net/ipv6/",
+        "net/xfrm/",
+        "net/netfilter/",
+        "include/uapi/linux/virtio_net.h"
+      ],
+      "triggers": [
+        "net/core/",
+        "net/xfrm/",
+        "skb->cb",
+        "destructor_arg",
+        "skb_uarg",
+        "xfrm_state",
+        "inner_mode",
+        "virtio_net_hdr",
+        "PACKET_HOST",
+        "PACKET_OTHERHOST"
+      ]
     }
   ]
 }

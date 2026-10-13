@@ -40,6 +40,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | MM Page Table Internals | `mm/memory.c`, `mm/mprotect.c`, `mm/pagewalk.c`, `mm/pt_reclaim.c`, `zap_pte_range`, `change_pte_range`, `try_to_free_pte`, `flush_tlb_batched_pending` | `contexts/mm-pagetable.md` |
 | MM Reclaim, Swap & Migration | `mm/vmscan.c`, `mm/swap_state.c`, `mm/migrate.c`, `mm/memcontrol.c`, `shrink_folio_list`, `evict_folios`, `LRU_GEN_MASK`, `dtc_dom`, `TTU_RMAP_LOCKED` | `contexts/mm-reclaim.md` |
 | MM VMA Internals | `mm/vma.c`, `mm/mmap.c`, `mm/mmap_lock.c`, `lock_vma_under_rcu`, `vma_prepare`, `vma_complete`, `vma_modify`, `vma_merge_`, `call_mmap_prepare` | `contexts/mm-vma.md` |
+| Networking Core Packet Flow & XFRM | `net/core/`, `net/xfrm/`, `skb->cb`, `destructor_arg`, `xfrm_state`, `inner_mode`, `virtio_net_hdr`, `PACKET_*` | `contexts/networking-core.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -70,3 +71,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Writeback, Swap, Memcg & Migration API | `folio_start_writeback`, `wbc_to_tag`, `PAGECACHE_TAG_*`, `folio_test_swapbacked`, `folio_test_swapcache`, `get_swap_device`, `mem_cgroup_*`, `folio_memcg`, `migrate_folio`, `filemap_migrate_folio` | `apis/mm-reclaim.md` |
 | VMA Classification, Flags & Locking API | `vma_is_anonymous`, `vma_set_anonymous`, `vm_flags_*`, `vma_start_write`, `mmap_read_lock_killable`, `vma_assert_locked`, `vma_interval_tree_foreach`, `find_vm_area`, `memfd_alloc_file`, `security_vm_enough_memory_mm` | `apis/mm-vma.md` |
 | Netlink & Generic Netlink API | `genl_notify`, `nla_*`, `NLA_*`, `NLM_F_*`, `nlmsg_*`, `netlink_callback`, `NL_SET_BAD_ATTR`, `NL_SET_ERR_ATTR_MISS` | `apis/netlink.md` |
+| SKB, Socket, Netfilter, Routing & SNMP API | `skb_put`, `skb_push`, `skb_pull`, `pskb_may_pull`, `skb_unshare`, `release_sock`, `sock_release`, `sock_hold`, `sock_put`, `NF_HOOK`, `skb_dst_force`, `SNMP_*` | `apis/networking-core.md` |
