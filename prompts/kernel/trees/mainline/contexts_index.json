@@ -283,6 +283,29 @@
         "report_fixup",
         "input_mapping"
       ]
+    },
+    {
+      "file": "hyp-arm64.md",
+      "covered_paths": [
+        "arch/arm64/kvm/hyp/",
+        "arch/arm64/kvm/pkvm.c",
+        "arch/arm64/include/asm/kvm_mmu.h",
+        "arch/arm64/include/asm/kvm_pkvm.h",
+        "drivers/iommu/arm/arm-smmu-v3/pkvm/"
+      ],
+      "triggers": [
+        "arch/arm64/kvm/hyp/",
+        "drivers/iommu/arm/arm-smmu-v3/pkvm/",
+        "pkvm_",
+        "__pkvm_",
+        "kern_hyp_va",
+        "hyp_pool",
+        "hyp_alloc_pages",
+        "hyp_fixmap_",
+        "hyp_vmemmap",
+        "flush_hyp_vcpu",
+        "sync_hyp_vcpu"
+      ]
     }
   ]
 }

@@ -63,7 +63,6 @@ and symbols regexes.
 | Rust | any Rust code | rust.md |
 | KVM | virt/kvm/, include/linux/kvm*, kvm_ | kvm.md |
 | ARM64 KVM (EL1/Host) | arch/arm64/kvm/ | kvm-arm64.md |
-| ARM64 Hyp (EL2) | arch/arm64/kvm/hyp/, __hyp_, arch/arm64/include/asm/kvm.*\.h, drivers/iommu/arm/arm-smmu-v3/pkvm/ | hyp-arm64.md |
 
 ## Optional Patterns
 
