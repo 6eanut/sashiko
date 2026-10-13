@@ -34,6 +34,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | libbpf Public API | `tools/lib/bpf/`, `LIBBPF_API`, `libbpf_err`, `libbpf_err_ptr`, `libbpf_ptr` | `contexts/libbpf.md` |
 | Media / V4L2 Subdevice Core | `drivers/media/`, `include/media/`, `v4l2_subdev_`, `V4L2_SUBDEV_`, `MEDIA_BUS_FMT_` | `contexts/media.md` |
 | MIPS Architecture | `arch/mips/`, `tlb_probe`, `tlb_read`, `tlb_write_indexed`, `write_c0_entryhi`, `TLBP`, `TLBR`, `TLBWI` | `contexts/mips.md` |
+| MM Page Allocator, SLUB & vmalloc | `mm/page_alloc.c`, `mm/slub.c`, `mm/vmalloc.c`, `get_page_from_freelist`, `lowmem_reserve`, `allocate_slab`, `pcp_spin_` | `contexts/mm-alloc.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -57,3 +58,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | LED Class & Trigger API | `led_classdev_register`, `led_classdev_unregister`, `devm_led_classdev_register`, `devm_led_classdev_register_ext`, `led_trigger_register`, `devm_led_trigger_register` | `apis/leds.md` |
 | Kernel Locking & Memory Ordering | `spin_lock*`, `raw_spin_lock*`, `local_lock`, `mutex_*`, `rwsem*`, `seqlock*`, `seqcount*`, `lockdep_pin_lock`, `cpus_read_lock`, `smp_store_release`, `smp_load_acquire` | `apis/locking.md` |
 | Multi-Function Device (MFD) API | `mfd_add_devices`, `devm_mfd_add_devices`, `mfd_remove_devices`, `mfd_cell`, `PLATFORM_DEVID_AUTO` | `apis/mfd.md` |
+| Memory Allocation, GFP & Slab API | `alloc_pages`, `__GFP_*`, `kmalloc`, `kzalloc`, `kmem_cache_*`, `vmalloc`, `mempool_alloc`, `memblock_*`, `gfpflags_allow_blocking`, `ARCH_KMALLOC_MINALIGN` | `apis/mm-alloc.md` |

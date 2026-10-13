@@ -451,6 +451,29 @@
         "TLBR",
         "TLBWI"
       ]
+    },
+    {
+      "file": "mm-alloc.md",
+      "covered_paths": [
+        "mm/page_alloc.c",
+        "mm/slub.c",
+        "mm/slab_common.c",
+        "mm/vmalloc.c",
+        "mm/mempool.c",
+        "mm/secretmem.c"
+      ],
+      "triggers": [
+        "mm/page_alloc.c",
+        "mm/slub.c",
+        "mm/slab_common.c",
+        "mm/vmalloc.c",
+        "get_page_from_freelist",
+        "__alloc_pages_slowpath",
+        "lowmem_reserve",
+        "allocate_slab",
+        "free_slab_obj_exts",
+        "pcp_spin_"
+      ]
     }
   ]
 }

@@ -419,6 +419,42 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "mm-alloc.md",
+      "defining_files": [
+        "include/linux/gfp.h",
+        "include/linux/gfp_types.h",
+        "include/linux/slab.h",
+        "include/linux/mempool.h",
+        "include/linux/memblock.h"
+      ],
+      "symbols": {
+        "exact": [
+          "alloc_pages",
+          "alloc_pages_node",
+          "kmalloc",
+          "kzalloc",
+          "kmalloc_nolock",
+          "kfree_nolock",
+          "vmalloc",
+          "mempool_alloc",
+          "memblock_add",
+          "memblock_remove",
+          "reserve_bootmem_region",
+          "gfpflags_allow_blocking",
+          "gfpflags_allow_spinning",
+          "current_gfp_context",
+          "gfp_nested_mask",
+          "set_active_memcg",
+          "ARCH_KMALLOC_MINALIGN",
+          "KMALLOC_MAX_CACHE_SIZE"
+        ],
+        "prefixes": [
+          "__GFP_",
+          "kmem_cache_"
+        ]
+      }
     }
   ]
 }
