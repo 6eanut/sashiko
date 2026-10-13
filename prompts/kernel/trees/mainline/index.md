@@ -53,6 +53,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | SunRPC Transport & GSS (`net/sunrpc/`) | `net/sunrpc/`, `svc_xprt_`, `svc_rqst`, `rpc_task`, `xprtrdma`, `rpcrdma_`, `svc_rdma_`, `gss_svc_` | `contexts/sunrpc.md` |
 | Sysfs Attribute Groups (`fs/sysfs/`) | `fs/sysfs/`, `sysfs_group_attrs_change_owner`, `kernfs_find_and_get`, `SYSFS_GROUP_INVISIBLE` | `contexts/sysfs.md` |
 | TTY & 8250 Serial Architecture | `drivers/tty/`, `8250_base`, `8250_port`, `8250_core`, `serial_core` | `contexts/tty.md` |
+| USB Mass Storage (`unusual_devs.h`) | `drivers/usb/storage/`, `unusual_devs.h`, `UNUSUAL_DEV`, `USB_SC_`, `USB_PR_` | `contexts/usb-storage.md` |
 
 ## Kernel API Guides (`apis/`)
 

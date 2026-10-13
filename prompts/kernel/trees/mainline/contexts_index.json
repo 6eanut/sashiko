@@ -809,6 +809,21 @@
         "8250_core",
         "serial_core"
       ]
+    },
+    {
+      "file": "usb-storage.md",
+      "covered_paths": [
+        "drivers/usb/storage/",
+        "include/linux/usb_usual.h"
+      ],
+      "triggers": [
+        "drivers/usb/storage/",
+        "unusual_devs.h",
+        "UNUSUAL_DEV",
+        "USB_SC_",
+        "USB_PR_",
+        "US_FL_"
+      ]
     }
   ]
 }
