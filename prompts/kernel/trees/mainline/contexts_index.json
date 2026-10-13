@@ -542,6 +542,36 @@
         "pgtable_supports_soft_dirty",
         "pte_range_none"
       ]
+    },
+    {
+      "file": "mm-reclaim.md",
+      "covered_paths": [
+        "mm/vmscan.c",
+        "mm/swap_state.c",
+        "mm/swapfile.c",
+        "mm/migrate.c",
+        "mm/memcontrol.c",
+        "mm/page-writeback.c",
+        "mm/shmem.c"
+      ],
+      "triggers": [
+        "mm/vmscan.c",
+        "mm/swap_state.c",
+        "mm/swapfile.c",
+        "mm/migrate.c",
+        "mm/memcontrol.c",
+        "mm/page-writeback.c",
+        "mm/shmem.c",
+        "shrink_folio_list",
+        "shrink_inactive_list",
+        "evict_folios",
+        "LRU_GEN_MASK",
+        "LRU_REFS_FLAGS",
+        "dtc_dom",
+        "collect_longterm_unpinnable_folios",
+        "TTU_RMAP_LOCKED",
+        "shmem_swaplist"
+      ]
     }
   ]
 }

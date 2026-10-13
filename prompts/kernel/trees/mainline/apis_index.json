@@ -562,6 +562,44 @@
           "tlb_"
         ]
       }
+    },
+    {
+      "file": "mm-reclaim.md",
+      "defining_files": [
+        "include/linux/writeback.h",
+        "include/linux/swap.h",
+        "include/linux/memcontrol.h",
+        "include/linux/migrate.h",
+        "include/linux/page-flags.h"
+      ],
+      "symbols": {
+        "exact": [
+          "folio_start_writeback",
+          "__folio_start_writeback",
+          "wbc_to_tag",
+          "folio_test_swapbacked",
+          "folio_test_swapcache",
+          "get_swap_device",
+          "put_swap_device",
+          "__swap_entry_to_info",
+          "__read_swap_cache_async",
+          "mem_cgroup_charge",
+          "mem_cgroup_uncharge",
+          "mem_cgroup_migrate",
+          "folio_memcg",
+          "mem_cgroup_id_get_online",
+          "mem_cgroup_from_id",
+          "mem_cgroup_tryget",
+          "folio_putback_lru",
+          "migrate_folio",
+          "filemap_migrate_folio",
+          "__migrate_folio"
+        ],
+        "prefixes": [
+          "PAGECACHE_TAG_",
+          "mem_cgroup_"
+        ]
+      }
     }
   ]
 }
