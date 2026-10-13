@@ -136,6 +136,21 @@
         "cxl_",
         "hmat_get_extended_linear_cache_size"
       ]
+    },
+    {
+      "file": "dax.md",
+      "covered_paths": [
+        "fs/dax.c",
+        "drivers/dax/",
+        "include/linux/dax.h"
+      ],
+      "triggers": [
+        "fs/dax.c",
+        "drivers/dax/",
+        "dax_layout_busy_page",
+        "dax_iomap_",
+        "dax_writeback_mapping_range"
+      ]
     }
   ]
 }
