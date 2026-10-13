@@ -786,6 +786,42 @@
           "pci_ep_"
         ]
       }
+    },
+    {
+      "file": "pm.md",
+      "defining_files": [
+        "include/linux/pm.h",
+        "include/linux/pm_runtime.h",
+        "include/linux/suspend.h",
+        "drivers/base/power/runtime.c",
+        "drivers/base/power/main.c"
+      ],
+      "symbols": {
+        "exact": [
+          "pm_runtime_get_sync",
+          "pm_runtime_resume_and_get",
+          "pm_runtime_get_noresume",
+          "pm_runtime_get_if_active",
+          "pm_runtime_put",
+          "pm_runtime_put_sync",
+          "pm_runtime_put_autosuspend",
+          "pm_runtime_put_sync_suspend",
+          "pm_runtime_suspend",
+          "pm_runtime_idle",
+          "pm_runtime_resume",
+          "pm_hibernate_is_recovering",
+          "pm_hibernation_mode_is_suspend",
+          "pm_sleep_ptr",
+          "pm_ptr",
+          "rpm_idle",
+          "rpm_suspend",
+          "rpm_resume"
+        ],
+        "prefixes": [
+          "pm_runtime_",
+          "__pm_runtime_"
+        ]
+      }
     }
   ]
 }

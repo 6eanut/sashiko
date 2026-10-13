@@ -27,7 +27,6 @@ and symbols regexes.
 | SunRPC | net/sunrpc/* | sunrpc.md |
 | RCU lifecycle | `call_rcu(`, `kfree_rcu(`, `synchronize_rcu(`, `rhashtable_*` + `call_rcu`, `hlist_del_rcu` + `call_rcu`, `list_del_rcu` + `call_rcu` | rcu.md |
 | Power Domains | drivers/pmdomain/, pm_genpd_, of_genpd_, exynos_pd_ | pmdomain.md |
-| PM Runtime | include/linux/pm_runtime.h, pm_runtime_, __pm_runtime_, rpm_idle, rpm_suspend, rpm_resume | pm.md |
 | Sysfs | fs/sysfs/, sysfs_create_group, sysfs_update_group, attribute_group, is_visible | sysfs.md |
 | TTY/Serial | drivers/tty/, uart_add_one_port, uart_ops, serial_core | tty.md |
 | SMB/ksmbd | fs/smb/server/, ksmbd_, smb_direct_ | smb-ksmbd.md |
