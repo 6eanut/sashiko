@@ -407,6 +407,19 @@
         "gfn_to_pfn_cache",
         "slots_lock"
       ]
+    },
+    {
+      "file": "libbpf.md",
+      "covered_paths": [
+        "tools/lib/bpf/"
+      ],
+      "triggers": [
+        "tools/lib/bpf/",
+        "LIBBPF_API",
+        "libbpf_err",
+        "libbpf_err_ptr",
+        "libbpf_ptr"
+      ]
     }
   ]
 }

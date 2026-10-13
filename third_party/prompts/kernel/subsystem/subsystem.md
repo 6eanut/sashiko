@@ -30,7 +30,6 @@ and symbols regexes.
 | Locking | spin_lock*, mutex_*, rwsem*, seqlock*, *seqcount* | locking.md |
 | Scheduler | kernel/sched/, sched_, schedule, *wakeup* | scheduler.md |
 | Timers | timer_list, timer_setup, mod_timer, del_timer, hrtimer, delayed_work | timers.md |
-| Libbpf API | tools/lib/bpf/, `LIBBPF_API`, `libbpf_err`, `libbpf_err_ptr` | libbpf.md |
 | RCU | rcu*, call_rcu, synchronize_rcu, kfree_rcu, kvfree_call_rcu | rcu.md |
 | Tracing | trace_, tracepoints | tracing.md |
 | Workqueue | kernel/workqueue.c, work_struct | workqueue.md |
