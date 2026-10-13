@@ -137,6 +137,17 @@
         "include/linux/leds.h",
         "Documentation/devicetree/bindings/leds/"
       ]
+    },
+    {
+      "file": "mfd.md",
+      "sections": [
+        "MULTIFUNCTION DEVICES (MFD)"
+      ],
+      "paths": [
+        "drivers/mfd/",
+        "include/linux/mfd/",
+        "Documentation/devicetree/bindings/mfd/"
+      ]
     }
   ]
 }

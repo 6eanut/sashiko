@@ -402,6 +402,23 @@
           "write_seqcount_"
         ]
       }
+    },
+    {
+      "file": "mfd.md",
+      "defining_files": [
+        "include/linux/mfd/core.h",
+        "drivers/mfd/mfd-core.c"
+      ],
+      "symbols": {
+        "exact": [
+          "mfd_add_devices",
+          "devm_mfd_add_devices",
+          "mfd_remove_devices",
+          "mfd_cell",
+          "PLATFORM_DEVID_AUTO"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

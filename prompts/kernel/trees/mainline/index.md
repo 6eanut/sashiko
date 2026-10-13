@@ -55,3 +55,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | KVM Core Helpers | `gfn_to_hva`, `gfn_to_hva_memslot`, `gfn_to_hva_memslot_prot`, `kvm_vcpu_memslots`, `vcpu_load`, `vcpu_put`, `kvm_make_request`, `kvm_check_request` | `apis/kvm.md` |
 | LED Class & Trigger API | `led_classdev_register`, `led_classdev_unregister`, `devm_led_classdev_register`, `devm_led_classdev_register_ext`, `led_trigger_register`, `devm_led_trigger_register` | `apis/leds.md` |
 | Kernel Locking & Memory Ordering | `spin_lock*`, `raw_spin_lock*`, `local_lock`, `mutex_*`, `rwsem*`, `seqlock*`, `seqcount*`, `lockdep_pin_lock`, `cpus_read_lock`, `smp_store_release`, `smp_load_acquire` | `apis/locking.md` |
+| Multi-Function Device (MFD) API | `mfd_add_devices`, `devm_mfd_add_devices`, `mfd_remove_devices`, `mfd_cell`, `PLATFORM_DEVID_AUTO` | `apis/mfd.md` |
