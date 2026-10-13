@@ -845,6 +845,24 @@
         "do_dentry_open",
         "s_umount"
       ]
+    },
+    {
+      "file": "wireless.md",
+      "covered_paths": [
+        "drivers/net/wireless/",
+        "net/mac80211/",
+        "include/net/mac80211.h"
+      ],
+      "triggers": [
+        "drivers/net/wireless/",
+        "net/mac80211/",
+        "BSS_CHANGED_",
+        "vif_cfg_changed",
+        "link_info_changed",
+        "bss_info_changed",
+        "ieee80211_vif_cfg_change_notify",
+        "ieee80211_link_info_change_notify"
+      ]
     }
   ]
 }

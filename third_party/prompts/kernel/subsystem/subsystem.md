@@ -18,6 +18,5 @@ and symbols regexes.
 | Subsystem | Triggers | File |
 |-----------|----------|------|
 | Workqueue | kernel/workqueue.c, work_struct | workqueue.md |
-| Wireless/mac80211 | drivers/net/wireless/, net/mac80211/, BSS_CHANGED_, vif_cfg_changed, link_info_changed, bss_info_changed | wireless.md |
 
 

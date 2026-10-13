@@ -55,6 +55,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | TTY & 8250 Serial Architecture | `drivers/tty/`, `8250_base`, `8250_port`, `8250_core`, `serial_core` | `contexts/tty.md` |
 | USB Mass Storage (`unusual_devs.h`) | `drivers/usb/storage/`, `unusual_devs.h`, `UNUSUAL_DEV`, `USB_SC_`, `USB_PR_` | `contexts/usb-storage.md` |
 | VFS Path Walk, Open & Superblock | `fs/namei.c`, `fs/open.c`, `fs/dcache.c`, `LOOKUP_RCU`, `try_to_unlazy`, `do_dentry_open`, `s_umount` | `contexts/vfs.md` |
+| Wireless (`mac80211`) MLO Callbacks | `drivers/net/wireless/`, `net/mac80211/`, `BSS_CHANGED_*`, `vif_cfg_changed`, `link_info_changed`, `bss_info_changed` | `contexts/wireless.md` |
 
 ## Kernel API Guides (`apis/`)
 
