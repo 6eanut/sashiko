@@ -87,6 +87,17 @@
         "include/linux/hwmon.h",
         "Documentation/hwmon/"
       ]
+    },
+    {
+      "file": "i2c.md",
+      "sections": [
+        "I2C SUBSYSTEM",
+        "I2C SUBSYSTEM HOST DRIVERS"
+      ],
+      "paths": [
+        "drivers/i2c/",
+        "include/linux/i2c.h"
+      ]
     }
   ]
 }

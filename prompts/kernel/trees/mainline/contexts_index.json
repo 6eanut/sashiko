@@ -306,6 +306,18 @@
         "flush_hyp_vcpu",
         "sync_hyp_vcpu"
       ]
+    },
+    {
+      "file": "i2c.md",
+      "covered_paths": [
+        "drivers/i2c/",
+        "include/linux/i2c.h"
+      ],
+      "triggers": [
+        "drivers/i2c/",
+        "i2c_client",
+        "i2c_adapter"
+      ]
     }
   ]
 }

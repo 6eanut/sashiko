@@ -24,6 +24,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | ARM GICv5 & vGICv5 | `drivers/irqchip/irq-gic-v5*`, `vgic-v5`, `arm-gic-v5.h`, `gicv5_`, `GICV5_`, `ICC_PPI_`, `gsb_sys`, `gsb_ack` | `contexts/gic-v5.md` |
 | HID Subsystem | `drivers/hid/`, `include/linux/hid.h`, `hid_device`, `hid_driver`, `hid_ll_driver`, `report_fixup` | `contexts/hid.md` |
 | ARM64 Hyp (EL2 / pKVM / nVHE) | `arch/arm64/kvm/hyp/`, `pkvm_`, `__pkvm_`, `kern_hyp_va`, `hyp_pool`, `hyp_fixmap_`, `hyp_vmemmap`, `flush_hyp_vcpu` | `contexts/hyp-arm64.md` |
+| I2C Subsystem | `drivers/i2c/`, `include/linux/i2c.h`, `i2c_client`, `i2c_adapter` | `contexts/i2c.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -39,3 +40,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | GPIO Consumer & Driver API | `linux/gpio.h`, `gpio_get_value`, `gpio_set_value`, `gpiod_get_raw_value`, `gpiod_set_raw_value`, `gpio_chip`, `GPIO_GENERIC`, `GPIO_REGMAP` | `apis/gpio.md` |
 | HID Transport & Driver API | `hid_allocate_device`, `hid_add_device`, `hid_destroy_device`, `hid_parse`, `hid_hw_start`, `hid_hw_stop`, `hid_device_io_start`, `hid_safe_input_report`, `hid_is_usb` | `apis/hid.md` |
 | Hardware Monitoring API | `hwmon_device_register_with_info`, `devm_hwmon_device_register_with_info`, `hwmon_lock`, `hwmon_unlock` | `apis/hwmon.md` |
+| I2C Transfer & DMA API | `i2c_transfer`, `i2c_master_send`, `i2c_master_recv`, `i2c_master_send_dmasafe`, `i2c_master_recv_dmasafe`, `I2C_M_DMA_SAFE`, `i2c_smbus_*`, `i2c_get_dma_safe_msg_buf`, `i2c_put_dma_safe_msg_buf` | `apis/i2c.md` |

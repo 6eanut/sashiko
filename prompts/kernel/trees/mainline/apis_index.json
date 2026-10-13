@@ -226,6 +226,28 @@
         ],
         "prefixes": []
       }
+    },
+    {
+      "file": "i2c.md",
+      "defining_files": [
+        "include/linux/i2c.h",
+        "drivers/i2c/i2c-core-base.c"
+      ],
+      "symbols": {
+        "exact": [
+          "i2c_transfer",
+          "i2c_master_send",
+          "i2c_master_recv",
+          "i2c_master_send_dmasafe",
+          "i2c_master_recv_dmasafe",
+          "I2C_M_DMA_SAFE",
+          "i2c_get_dma_safe_msg_buf",
+          "i2c_put_dma_safe_msg_buf"
+        ],
+        "prefixes": [
+          "i2c_smbus_"
+        ]
+      }
     }
   ]
 }
