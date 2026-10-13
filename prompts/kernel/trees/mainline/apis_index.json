@@ -49,6 +49,24 @@
           "bio_for_each_"
         ]
       }
+    },
+    {
+      "file": "boot-params.md",
+      "defining_files": [
+        "include/linux/init.h",
+        "include/linux/moduleparam.h",
+        "Documentation/admin-guide/kernel-parameters.txt"
+      ],
+      "symbols": {
+        "exact": [
+          "__setup",
+          "early_param",
+          "module_param",
+          "module_param_named",
+          "core_param"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

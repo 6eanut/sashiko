@@ -9,6 +9,17 @@
         "drivers/ata/",
         "include/linux/libata.h"
       ]
+    },
+    {
+      "file": "boot-params.md",
+      "sections": [
+        "DOCUMENTATION"
+      ],
+      "paths": [
+        "Documentation/admin-guide/kernel-parameters.txt",
+        "include/linux/moduleparam.h",
+        "include/linux/init.h"
+      ]
     }
   ]
 }
