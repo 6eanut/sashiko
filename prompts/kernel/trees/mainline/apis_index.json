@@ -186,6 +186,30 @@
           "gpiochip_"
         ]
       }
+    },
+    {
+      "file": "hid.md",
+      "defining_files": [
+        "include/linux/hid.h",
+        "drivers/hid/hid-core.c"
+      ],
+      "symbols": {
+        "exact": [
+          "hid_allocate_device",
+          "hid_add_device",
+          "hid_destroy_device",
+          "hid_parse",
+          "hid_open_report",
+          "hid_hw_start",
+          "hid_hw_stop",
+          "hid_device_io_start",
+          "hid_device_io_stop",
+          "hid_input_report",
+          "hid_safe_input_report",
+          "hid_is_usb"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

@@ -267,6 +267,22 @@
         "gsb_sys",
         "gsb_ack"
       ]
+    },
+    {
+      "file": "hid.md",
+      "covered_paths": [
+        "drivers/hid/",
+        "include/linux/hid.h"
+      ],
+      "triggers": [
+        "drivers/hid/",
+        "include/linux/hid.h",
+        "hid_device",
+        "hid_driver",
+        "hid_ll_driver",
+        "report_fixup",
+        "input_mapping"
+      ]
     }
   ]
 }
