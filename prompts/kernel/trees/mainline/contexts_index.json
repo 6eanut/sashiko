@@ -390,6 +390,23 @@
         "user_mem_abort",
         "ICH_HCR_EL2"
       ]
+    },
+    {
+      "file": "kvm.md",
+      "covered_paths": [
+        "virt/kvm/",
+        "arch/x86/kvm/",
+        "include/linux/kvm_host.h"
+      ],
+      "triggers": [
+        "virt/kvm/",
+        "arch/x86/kvm/",
+        "kvm_mmu_",
+        "is_page_fault_stale",
+        "mmu_invalidate_seq",
+        "gfn_to_pfn_cache",
+        "slots_lock"
+      ]
     }
   ]
 }

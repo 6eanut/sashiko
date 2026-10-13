@@ -325,6 +325,28 @@
           "kho_"
         ]
       }
+    },
+    {
+      "file": "kvm.md",
+      "defining_files": [
+        "include/linux/kvm_host.h",
+        "virt/kvm/kvm_main.c"
+      ],
+      "symbols": {
+        "exact": [
+          "gfn_to_hva",
+          "gfn_to_hva_many",
+          "gfn_to_hva_memslot",
+          "gfn_to_hva_memslot_prot",
+          "kvm_vcpu_memslots",
+          "kvm_memslots",
+          "vcpu_load",
+          "vcpu_put",
+          "kvm_make_request",
+          "kvm_check_request"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }

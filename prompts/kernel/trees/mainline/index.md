@@ -30,6 +30,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Kconfig | `Kconfig`, `config `, `select `, `depends on `, `COMPILE_TEST` | `contexts/kconfig.md` |
 | Kexec Handover (KHO) | `kernel/liveupdate/`, `kexec_handover`, `kho_` | `contexts/kho.md` |
 | ARM64 KVM (Host / EL1) | `arch/arm64/kvm/`, `vcpu_has_run_once`, `kvm_vcpu_initialized`, `vcpu_sysreg`, `user_mem_abort`, `ICH_HCR_EL2` | `contexts/kvm-arm64.md` |
+| KVM Core & x86 MMU | `virt/kvm/`, `arch/x86/kvm/`, `kvm_mmu_`, `is_page_fault_stale`, `mmu_invalidate_seq`, `gfn_to_pfn_cache`, `slots_lock` | `contexts/kvm.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -49,3 +50,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Input Device & FF API | `input_allocate_device`, `devm_input_allocate_device`, `input_register_device`, `input_free_device`, `input_device_enabled`, `input_report_*`, `input_sync`, `input_ff_create_memless` | `apis/input.md` |
 | MMIO Stream & Register Accessors | `writesl`, `readsl`, `writesw`, `readsw`, `writesb`, `readsb`, `__raw_writel`, `__raw_readl` | `apis/io-accessors.md` |
 | Kexec Handover (KHO) API | `kho_is_enabled`, `is_kho_boot`, `kho_add_subtree`, `kho_remove_subtree`, `kho_retrieve_subtree`, `kho_preserve_folio`, `kho_preserve_pages`, `kho_alloc_preserve` | `apis/kho.md` |
+| KVM Core Helpers | `gfn_to_hva`, `gfn_to_hva_memslot`, `gfn_to_hva_memslot_prot`, `kvm_vcpu_memslots`, `vcpu_load`, `vcpu_put`, `kvm_make_request`, `kvm_check_request` | `apis/kvm.md` |

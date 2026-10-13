@@ -110,6 +110,22 @@
         "include/linux/input.h",
         "include/linux/input/"
       ]
+    },
+    {
+      "file": "kvm.md",
+      "sections": [
+        "KERNEL VIRTUAL MACHINE (KVM)",
+        "KERNEL VIRTUAL MACHINE FOR X86 (KVM/x86)",
+        "KERNEL VIRTUAL MACHINE FOR ARM64 (KVM/arm64)",
+        "KVM GUEST_MEMFD"
+      ],
+      "paths": [
+        "virt/kvm/",
+        "arch/x86/kvm/",
+        "arch/arm64/kvm/",
+        "include/linux/kvm_host.h",
+        "include/uapi/linux/kvm.h"
+      ]
     }
   ]
 }

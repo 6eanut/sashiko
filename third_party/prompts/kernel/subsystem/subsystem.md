@@ -55,7 +55,6 @@ and symbols regexes.
 | USB Storage | drivers/usb/storage/, unusual_devs.h, UNUSUAL_DEV, USB_SC_, USB_PR_ | usb-storage.md |
 | Objtool | tools/objtool/, INSN_BUG, INSN_TRAP, decode.c | objtool.md |
 | Rust | any Rust code | rust.md |
-| KVM | virt/kvm/, include/linux/kvm*, kvm_ | kvm.md |
 
 ## Optional Patterns
 
