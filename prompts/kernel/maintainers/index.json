@@ -35,6 +35,18 @@
         "tools/lib/bpf/",
         "tools/testing/selftests/bpf/"
       ]
+    },
+    {
+      "file": "build.md",
+      "sections": [
+        "KERNEL BUILD + files below scripts/ (unless maintained elsewhere)"
+      ],
+      "paths": [
+        "Makefile",
+        "Kbuild",
+        "scripts/",
+        "tools/objtool/"
+      ]
     }
   ]
 }

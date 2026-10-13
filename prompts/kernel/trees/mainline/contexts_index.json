@@ -107,6 +107,23 @@
         "btrfs_extent_map_block_start",
         "btrfs_get_dev_zone_info"
       ]
+    },
+    {
+      "file": "build.md",
+      "covered_paths": [
+        "Makefile",
+        "Kbuild",
+        "scripts/",
+        "tools/"
+      ],
+      "triggers": [
+        "Kbuild",
+        "Makefile",
+        "scripts/",
+        "gnu11",
+        "-funsigned-char",
+        "-fno-strict-aliasing"
+      ]
     }
   ]
 }
