@@ -43,3 +43,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Hardware Monitoring API | `hwmon_device_register_with_info`, `devm_hwmon_device_register_with_info`, `hwmon_lock`, `hwmon_unlock` | `apis/hwmon.md` |
 | I2C Transfer & DMA API | `i2c_transfer`, `i2c_master_send`, `i2c_master_recv`, `i2c_master_send_dmasafe`, `i2c_master_recv_dmasafe`, `I2C_M_DMA_SAFE`, `i2c_smbus_*`, `i2c_get_dma_safe_msg_buf`, `i2c_put_dma_safe_msg_buf` | `apis/i2c.md` |
 | Input Device & FF API | `input_allocate_device`, `devm_input_allocate_device`, `input_register_device`, `input_free_device`, `input_device_enabled`, `input_report_*`, `input_sync`, `input_ff_create_memless` | `apis/input.md` |
+| MMIO Stream & Register Accessors | `writesl`, `readsl`, `writesw`, `readsw`, `writesb`, `readsb`, `__raw_writel`, `__raw_readl` | `apis/io-accessors.md` |

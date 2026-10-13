@@ -273,6 +273,28 @@
           "input_report_"
         ]
       }
+    },
+    {
+      "file": "io-accessors.md",
+      "defining_files": [
+        "include/asm-generic/io.h",
+        "include/linux/io.h"
+      ],
+      "symbols": {
+        "exact": [
+          "writesl",
+          "readsl",
+          "writesw",
+          "readsw",
+          "writesb",
+          "readsb",
+          "__raw_writel",
+          "__raw_readl",
+          "__raw_writew",
+          "__raw_readw"
+        ],
+        "prefixes": []
+      }
     }
   ]
 }
