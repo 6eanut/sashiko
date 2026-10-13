@@ -54,6 +54,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Sysfs Attribute Groups (`fs/sysfs/`) | `fs/sysfs/`, `sysfs_group_attrs_change_owner`, `kernfs_find_and_get`, `SYSFS_GROUP_INVISIBLE` | `contexts/sysfs.md` |
 | TTY & 8250 Serial Architecture | `drivers/tty/`, `8250_base`, `8250_port`, `8250_core`, `serial_core` | `contexts/tty.md` |
 | USB Mass Storage (`unusual_devs.h`) | `drivers/usb/storage/`, `unusual_devs.h`, `UNUSUAL_DEV`, `USB_SC_`, `USB_PR_` | `contexts/usb-storage.md` |
+| VFS Path Walk, Open & Superblock | `fs/namei.c`, `fs/open.c`, `fs/dcache.c`, `LOOKUP_RCU`, `try_to_unlazy`, `do_dentry_open`, `s_umount` | `contexts/vfs.md` |
 
 ## Kernel API Guides (`apis/`)
 
@@ -96,3 +97,4 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Kernel Timers (`timer_list`, `hrtimer`, `delayed_work`) | `timer_setup`, `mod_timer`, `timer_delete_sync`, `timer_shutdown_sync`, `hrtimer_setup`, `hrtimer_cancel`, `delayed_work`, `cancel_delayed_work_sync` | `apis/timers.md` |
 | Kernel Tracepoints & `TRACE_EVENT` API | `TRACE_EVENT*`, `TP_fast_assign`, `__string`, `__assign_str`, `CREATE_TRACE_POINTS`, `tracepoint_probe_register`, `tracepoint_synchronize_unregister`, `rv_attach_trace_probe` | `apis/tracing.md` |
 | Serial Core & UART Registration API | `uart_add_one_port`, `uart_remove_one_port`, `uart_ops`, `uart_configure_port`, `uart_change_pm` | `apis/tty.md` |
+| VFS Inode, Dentry & `file_operations` API | `inode_lock_nested`, `I_MUTEX_PARENT`, `lock_rename`, `d_instantiate`, `d_instantiate_new`, `d_add`, `d_unhashed`, `inode_permission`, `replace_fops`, `vfs_*` | `apis/vfs.md` |

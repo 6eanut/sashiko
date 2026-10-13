@@ -824,6 +824,27 @@
         "USB_PR_",
         "US_FL_"
       ]
+    },
+    {
+      "file": "vfs.md",
+      "covered_paths": [
+        "fs/namei.c",
+        "fs/open.c",
+        "fs/dcache.c",
+        "fs/super.c",
+        "fs/file_table.c"
+      ],
+      "triggers": [
+        "fs/namei.c",
+        "fs/open.c",
+        "fs/dcache.c",
+        "LOOKUP_RCU",
+        "try_to_unlazy",
+        "lookup_fast",
+        "lookup_slow",
+        "do_dentry_open",
+        "s_umount"
+      ]
     }
   ]
 }

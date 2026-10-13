@@ -1006,6 +1006,45 @@
           "uart_"
         ]
       }
+    },
+    {
+      "file": "vfs.md",
+      "defining_files": [
+        "include/linux/fs.h",
+        "include/linux/dcache.h",
+        "fs/namei.c",
+        "fs/dcache.c"
+      ],
+      "symbols": {
+        "exact": [
+          "inode_lock",
+          "inode_lock_nested",
+          "I_MUTEX_NORMAL",
+          "I_MUTEX_PARENT",
+          "I_MUTEX_CHILD",
+          "I_MUTEX_XATTR",
+          "I_MUTEX_NONDIR2",
+          "I_MUTEX_PARENT2",
+          "lock_rename",
+          "lock_two_nondirectories",
+          "d_instantiate",
+          "d_instantiate_new",
+          "d_add",
+          "d_is_negative",
+          "d_is_positive",
+          "d_unhashed",
+          "dget",
+          "dput",
+          "inode_permission",
+          "file_permission",
+          "replace_fops",
+          "fops_get",
+          "fops_put"
+        ],
+        "prefixes": [
+          "vfs_"
+        ]
+      }
     }
   ]
 }
