@@ -560,6 +560,34 @@ pub fn match_maintainer_notes(
     out
 }
 
+/// Reports whether a Part 2 code-context `trigger` fires for a patch.
+///
+/// A trigger matches a touched file path by substring, or a diff identifier
+/// exactly. A trigger ending in `_` (e.g. `GICD_`, `rust_helper_`) names an
+/// identifier family and matches any identifier with that prefix, because
+/// [`extract_identifiers_from_diff`] yields whole identifiers only. A trailing
+/// `!` (Rust macro invocation, e.g. `build_assert!`) is ignored for identifier
+/// matching, since the extractor drops punctuation.
+fn context_trigger_matches(
+    trigger: &str,
+    touched_files: &[String],
+    diff_identifiers: &BTreeSet<String>,
+) -> bool {
+    let t = trigger.trim();
+    if t.is_empty() {
+        return false;
+    }
+    if touched_files.iter().any(|f| f.contains(t)) {
+        return true;
+    }
+    let ident = t.strip_suffix('!').unwrap_or(t);
+    if ident.ends_with('_') {
+        diff_identifiers.iter().any(|id| id.starts_with(ident))
+    } else {
+        diff_identifiers.contains(ident)
+    }
+}
+
 /// Matches Part 2 Code Contexts against modified files and diff identifiers.
 pub fn match_code_contexts(
     index: &CodeContextsIndex,
@@ -581,12 +609,7 @@ pub fn match_code_contexts(
         let trigger_hits = entry
             .triggers
             .iter()
-            .filter(|t| {
-                let t_trim = t.trim();
-                !t_trim.is_empty()
-                    && (diff_identifiers.contains(t_trim)
-                        || touched_files.iter().any(|f| f.contains(t_trim)))
-            })
+            .filter(|t| context_trigger_matches(t, touched_files, diff_identifiers))
             .count();
         if let Some(depth) = path_depth {
             let score = 100usize
@@ -1228,6 +1251,26 @@ index 1111111..2222222 100644
         assert!(filtered.contains("Use netlink."));
         assert!(filtered.contains("Never call BUG_ON() in packet paths."));
         assert!(!filtered.contains("Reverse Christmas Tree"));
+    }
+
+    #[test]
+    fn test_context_trigger_prefix_and_macro_matching() {
+        let files = vec!["drivers/irqchip/irq-gic-v3.c".to_string()];
+        let idents: BTreeSet<String> = ["GICD_CTLR", "build_assert", "rust_helper_mutex_lock"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        assert!(context_trigger_matches("GICD_", &[], &idents));
+        assert!(context_trigger_matches("rust_helper_", &[], &idents));
+        assert!(context_trigger_matches("build_assert!", &[], &idents));
+        assert!(context_trigger_matches(
+            "irq-gic-v3",
+            &files,
+            &BTreeSet::new()
+        ));
+        assert!(!context_trigger_matches("GICR_", &[], &idents));
+        assert!(!context_trigger_matches("GICD", &[], &idents));
+        assert!(!context_trigger_matches("  ", &files, &idents));
     }
 
     #[test]
