@@ -105,7 +105,7 @@ Guides to load: [list]
 Load ALL matched guides in a single parallel Read, along with:
 - `<prompt_dir>/technical-patterns.md`
 - `<prompt_dir>/callstack.md`
-- `<prompt_dir>/subsystem/locking.md` (if any locking is involved)
+- `<prompt_dir>/trees/mainline/apis/locking.md` (if any locking is involved)
 
 ### Subsystem intersection analysis
 

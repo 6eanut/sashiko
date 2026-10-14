@@ -27,7 +27,7 @@ Read the following files:
    subsystems to guide files
 4. `<prompt_dir>/technical-patterns.md` — cross-subsystem patterns (to avoid
    duplicating knowledge that belongs there)
-5. `<prompt_dir>/subsystem/locking.md` — locking subsystem guide (many missed
+5. `<prompt_dir>/trees/mainline/apis/locking.md` — locking API guide (many missed
    bugs involve locking; read this to avoid duplicating its content)
 
 Extract from `review-failed.md`:

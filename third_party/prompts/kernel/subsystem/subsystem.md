@@ -18,4 +18,9 @@ and symbols regexes.
 | Subsystem | Triggers | File |
 |-----------|----------|------|
 
+## Optional Patterns
 
+Load only when explicitly requested in the prompt:
+
+- **Subjective Review** (maintainers/subjective-review.md): Subjective
+  general assessment of design, API, and commit message quality
