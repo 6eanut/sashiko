@@ -20,6 +20,7 @@
     5. Install the PTE without dropping `kvm->mmu_lock` after the check.
     6. Release `kvm->mmu_lock`.
     * *Exception*: Fault handlers that pin pages via `pin_user_pages()` (`FOLL_PIN`) and manage hyp page ownership directly (such as ARM64 `pkvm_mem_abort()`) do not use MMU notifier retry.
+* **Notifier Start/End Pairing**: Every `invalidate_range_start()` must be balanced by exactly one `invalidate_range_end()` that observes the same memslots. `kvm->mn_active_invalidate_count` blocks memslot updates between the two calls so that conditional locking takes the same decision in both; any change that lets memslots change in between, or that skips one side on an early return, unbalances `kvm->mmu_invalidate_in_progress` and makes the retry check report "no retry needed" for a stale PFN.
 * **`gfn_to_pfn_cache` Refresh**: Must re-check `mmu_invalidate_seq` after pinning the page to close the TOCTOU window.
 * **Private vs Public Memslots (`KVM_SET_USER_MEMORY_REGION2`)**: Private (`KVM_MEM_GUEST_MEMFD`) and public memslots must never overlap in GPA space, and memslot flag/range updates must go through `kvm_set_memory_region()`.
 

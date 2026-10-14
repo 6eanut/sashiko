@@ -11,6 +11,7 @@ This guide provides authoritative rules for the PCI Endpoint (EPC/EPF) and MSI/M
 ## 2. PCI IRQ Vector Allocation and Cleanup
 *   **`pci_alloc_irq_vectors(pdev, min_vecs, max_vecs, flags)`:** Returns the negative `errno` on failure or the positive number of allocated vectors on success.
 *   **Cleanup:** Once `pci_alloc_irq_vectors()` succeeds, every subsequent error path in probe/init (and the driver remove/teardown path) must call `pci_free_irq_vectors(pdev)` (unless managed via `pcim_enable_device()`).
+*   **Legacy MSI interfaces:** `pci_enable_msi()` / `pci_disable_msi()` (`drivers/pci/msi/api.c`) are legacy single-vector interfaces without MSI-X support. Flag their use in newly added code and expect `pci_alloc_irq_vectors()` / `pci_free_irq_vectors()` instead; existing callers left untouched by a patch are not a defect of that patch.
 
 ## 3. Execution Context and Synchronization
 *   **Sleeping Constraints:** Most `pci_epc_*` and `pci_epf_*` operations (e.g., `pci_epc_write_header`, `pci_epc_set_bar`) involve hardware communication and **may sleep**. They must not be called from atomic contexts (interrupt handlers, `spin_lock` critical sections).

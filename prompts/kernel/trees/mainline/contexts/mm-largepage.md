@@ -7,6 +7,10 @@
     *   On truncate across a large folio, if splitting fails, `try_folio_split_or_unmap()` must fully unmap the folio so subsequent faults map it with `i_size`-clamped PTEs.
 *   **mTHP Swapin Conflict Check (`non_swapcache_batch`)**: Before large-folio swapin (`can_swapin_thp()`, `shmem_swap_alloc_folio()`), verify `non_swapcache_batch(entry, nr_pages) == nr_pages` and fall back to order 0 if any slot in the range already has `SWAP_HAS_CACHE` set, avoiding unbounded `-EEXIST` retry loops in `swapcache_prepare()`.
 *   **Mapcount Snapshot & Deferred Split**: Reading multiple large-folio mapcount fields (`_large_mapcount`, `_entire_mapcount`, `_nr_pages_mapped`) consistently requires `folio_lock_large_mapcount()` (as in `__wp_can_reuse_large_anon_folio()`). Partially unmapping a large folio must queue it via `deferred_split_folio()`.
+*   **Compound PFN Natural Alignment**: An order-`n` compound page starts at a PFN aligned to `1 << n`; any subpage PFN rounds down to the head with `ALIGN_DOWN(pfn, 1UL << order)`. Head-PFN arithmetic that ignores the order is wrong for large folios.
+*   **Page-Cache References on Large Folios**: `__filemap_add_folio()` takes `folio_nr_pages()` references; removal must drop all of them with `folio_put_refs(folio, folio_nr_pages(folio))` (as in `filemap_free_folio()`). A single `folio_put()` after `__filemap_remove_folio()` leaks `folio_nr_pages() - 1` references.
+*   **Boundary-Spanning Folios in PFN/Range Walks**: A large folio crossing sub-range boundaries is visited once per sub-range. Walkers must deduplicate (track the last processed folio, as DAMON's `last_applied` does, or advance by `folio_size()`) or actions and statistics are applied multiple times.
+*   **Hugetlb Rejection in Generic Folio Callbacks**: New rmap/migration callbacks that only handle PTE-mapped folios must reject hugetlb early with `folio_test_hugetlb()`; hugetlb needs distinct PTE ops, rmap helpers, RSS accounting, and locking (compare the hugetlb branches of `try_to_unmap_one()` / `try_to_migrate_one()` in `mm/rmap.c`).
 
 ## Hugetlb Locking, Accounting, and PMD Sharing (`mm/hugetlb.c`)
 

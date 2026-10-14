@@ -42,7 +42,9 @@
 * **Publish / Subscribe Ordering**: Use `smp_store_release(&ptr, data)` (or `rcu_assign_pointer()`) after initializing `data->fields` to publish a pointer, paired with `smp_load_acquire(&ptr)` (or `rcu_dereference()`) on the consumer.
 * **Reference-Budget Check Before Reporting UAF**:
   * Before reporting a race or use-after-free across async work, RCU callbacks, or workqueues, trace every pin keeping the object alive (refcount, held lock, open RCU read-side section, or synchronous drain before free).
+  * Report only if the free can happen while the using side still holds a live pointer with no pin. It is not a use-after-free when the stored pointer is itself counted (its holder took a reference when saving it, so the free is merely deferred), or when the freeing side waits for the user to finish before freeing.
   * Returning pooled/permanently-mapped storage to a pool is a logical free: writes after logical free are always bugs (corrupting the next owner), while reads after logical free are bugs when the stale value drives control flow or state.
+  * Record the result as one line: `budget: acquires=[...], releases=[...], refs_live_at_free=..., free_reachable_without_pin=[proof | no]; logical_free=[storage-free | pool-return], use=[read-driving-decision | write]`
 * **Lock Drop & Re-Acquire**: Dropping and re-acquiring a lock invalidates all state validated before the drop; pointers, flags, and conditions must be re-checked after re-acquisition.
 * **Synchronous Cancellation**: During teardown, ensure all asynchronous work (timers, workqueues) is cancelled via `cancel_work_sync()` or `cancel_delayed_work_sync()` *before* the object is freed.
 
