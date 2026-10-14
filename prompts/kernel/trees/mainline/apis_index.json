@@ -43,7 +43,8 @@
           "bvec_alloc",
           "bio_integrity_prep",
           "bio_integrity_alloc_buf",
-          "bio_kmalloc"
+          "bio_kmalloc",
+          "bio_first_bvec_all"
         ],
         "prefixes": [
           "bio_for_each_"
@@ -253,10 +254,11 @@
           "intel_cx0_phy_transaction_begin",
           "intel_cx0_rmw",
           "intel_cx0_read",
-          "intel_cx0_write",
-          "drm_dp_dpcd_probe"
+          "intel_cx0_write"
         ],
-        "prefixes": []
+        "prefixes": [
+          "intel_cx0_"
+        ]
       }
     },
     {
@@ -498,7 +500,9 @@
           "kvm_make_request",
           "kvm_check_request"
         ],
-        "prefixes": []
+        "prefixes": [
+          "gfn_to_pfn"
+        ]
       }
     },
     {
@@ -567,8 +571,7 @@
           "mfd_add_devices",
           "devm_mfd_add_devices",
           "mfd_remove_devices",
-          "mfd_cell",
-          "PLATFORM_DEVID_AUTO"
+          "mfd_cell"
         ],
         "prefixes": []
       }
@@ -619,8 +622,6 @@
       ],
       "symbols": {
         "exact": [
-          "page_folio",
-          "compound_head",
           "folio_expected_ref_count",
           "folio_ref_count",
           "folio_mapcount",
@@ -671,7 +672,11 @@
           "folio_contain_hwpoisoned_page"
         ],
         "prefixes": [
-          "split_huge_"
+          "split_huge_",
+          "__folio_set_",
+          "__folio_clear_",
+          "__SetPage",
+          "__ClearPage"
         ]
       }
     },
@@ -851,7 +856,8 @@
           "SNMP_ADD_STATS",
           "SNMP_ADD_STATS64",
           "SNMP_UPD_PO_STATS64",
-          "__SNMP_ADD_STATS64"
+          "__SNMP_ADD_STATS64",
+          "__SNMP_UPD_PO_STATS64"
         ],
         "prefixes": [
           "skb_",
@@ -1134,7 +1140,8 @@
           "INIT_DELAYED_WORK",
           "schedule_delayed_work",
           "queue_delayed_work",
-          "cancel_delayed_work_sync"
+          "cancel_delayed_work_sync",
+          "hrtimer"
         ],
         "prefixes": [
           "timer_",
@@ -1165,7 +1172,8 @@
           "tracepoint_probe_register",
           "tracepoint_probe_unregister",
           "tracepoint_synchronize_unregister",
-          "rv_attach_trace_probe"
+          "rv_attach_trace_probe",
+          "rv_detach_trace_probe"
         ],
         "prefixes": [
           "trace_",

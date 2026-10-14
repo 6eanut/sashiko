@@ -10,7 +10,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | ATA / libata Subsystem Code Context Guide (Linux v7.3-rc5) | `drivers/ata/`, `ata_dev_`, `ata_port_`, `ata_read_log_`, `ATA_QUIRK_` | `contexts/ata.md` |
 | Block Layer Subsystem Context (Linux v7.3-rc5) | `block/`, `drivers/nvme/`, `blk_mq_`, `elevator_mq_ops`, `depth_updated`, `nr_requests` | `contexts/block.md` |
 | Bluetooth Subsystem Context (`net/bluetooth/`) | `net/bluetooth/`, `hci_`, `HCI_LE_ADV`, `adv_instances`, `cur_adv_instance`, `mgmt_pending_` | `contexts/bluetooth.md` |
-| BPF Verifier & Kfunc Subsystem Context (`kernel/bpf/`) | `kernel/bpf/`, `__bpf_kfunc`, `BTF_KFUNCS`, `check_kfunc_args`, `verifier` | `contexts/bpf.md` |
+| BPF Verifier & Kfunc Subsystem Context (`kernel/bpf/`) | `kernel/bpf/`, `__bpf_kfunc`, `BTF_KFUNCS`, `check_kfunc_args`, `verifier`, `BTF_ID_FLAGS`, `KF_*` | `contexts/bpf.md` |
 | BPF Subsystem Code Context Guide (Linux v7.3-rc5) | `map_check_btf`, `btf_parse_fields`, `BPF_SPIN_LOCK`, `BPF_RES_SPIN_LOCK`, `BPF_TIMER`, `BPF_KPTR`, `BPF_LIST_HEAD`, `BPF_RB_ROOT` | `contexts/btf.md` |
 | Btrfs Subsystem Context (`fs/btrfs/`) | `fs/btrfs/`, `extent_map`, `btrfs_extent_map_block_start`, `btrfs_get_dev_zone_info` | `contexts/btrfs.md` |
 | Kernel Build System & Compiler Environment (`Makefile`, `scripts/`, `tools/`) | `Kbuild`, `Makefile`, `scripts/`, `gnu11`, `-funsigned-char`, `-fno-strict-aliasing` | `contexts/build.md` |
@@ -19,7 +19,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | DAX (Direct Access) Subsystem Context (Linux v7.3-rc5) | `fs/dax.c`, `drivers/dax/`, `dax_layout_busy_page`, `dax_iomap_`, `dax_writeback_mapping_range` | `contexts/dax.md` |
 | DMA Engine Subsystem Code Context Guide (Linux v7.3-rc5) | `drivers/dma/`, `dma_device`, `dma_chan`, `dma_async_tx_descriptor`, `dmaengine_terminate_sync`, `vchan_` | `contexts/dmaengine.md` |
 | DRM / GPU Subsystem Context (`drivers/gpu/drm/`) | `drivers/gpu/drm/`, `include/drm/`, `drm_atomic_`, `drm_crtc_`, `drm_gpuvm`, `amdgpu_`, `amdkfd`, `hwseq` | `contexts/drm.md` |
-| Device Tree YAML Bindings Context (`Documentation/devicetree/bindings/`) | `Documentation/devicetree/bindings/`, `devicetree/org/schemas`, `#gpio-cells`, `#clock-cells`, `#interrupt-cells` | `contexts/dt-bindings.md` |
+| Device Tree YAML Bindings Context (`Documentation/devicetree/bindings/`) | `Documentation/devicetree/bindings/`, `#gpio-cells`, `#clock-cells`, `#interrupt-cells` | `contexts/dt-bindings.md` |
 | Ext4 and JBD2 Subsystem Code Context Guide (Linux v7.3-rc5) | `fs/ext4/`, `fs/jbd2/`, `ext4_inode_info`, `ext4_sb_info`, `jbd2_journal_start`, `jbd2_journal_stop`, `ext4_ext_` | `contexts/ext4.md` |
 | Filesystem Encryption (`fscrypt`) Context (`fs/crypto/`, `include/linux/fscrypt.h`) | `fs/crypto/`, `fscrypt_`, `FSCRYPT_` | `contexts/fscrypt.md` |
 | FUSE Subsystem Code Context Guide (Linux v7.3-rc5) | `fs/fuse/`, `fuse_uring_`, `fuse_chan_`, `fuse_dev_`, `FUSE_IO_URING`, `FUSE_OVER_IO_URING` | `contexts/fuse.md` |
@@ -30,7 +30,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | I2C Subsystem Code Context Guide (Linux v7.3-rc5) | `drivers/i2c/`, `i2c_client`, `i2c_adapter` | `contexts/i2c.md` |
 | Input Subsystem Code Context Guide (Linux v7.3-rc5) | `drivers/input/`, `input_dev`, `input_handler`, `evdev` | `contexts/input.md` |
 | io_uring Subsystem Code Context (`io_uring/`) | `io_uring/`, `io_uring_`, `io_ring_`, `io_sq_`, `io_cq_`, `io_wq_`, `io_kiocb`, `IORING_` | `contexts/io_uring.md` |
-| Kconfig Code Context (`scripts/kconfig/`) | `Kconfig`, `depends on `, `COMPILE_TEST` | `contexts/kconfig.md` |
+| Kconfig Code Context (`scripts/kconfig/`) | `Kconfig`, `COMPILE_TEST` | `contexts/kconfig.md` |
 | Kexec Handover (KHO) and Live Update Orchestrator (LUO) Code Context Guide | `kernel/liveupdate/`, `kexec_handover`, `kho_` | `contexts/kho.md` |
 | ARM64 KVM (Host / EL1) Code Context (`arch/arm64/kvm/`) | `arch/arm64/kvm/`, `vcpu_has_run_once`, `kvm_vcpu_initialized`, `vcpu_sysreg`, `user_mem_abort`, `ICH_HCR_EL2` | `contexts/kvm-arm64.md` |
 | KVM Subsystem Code Context (`virt/kvm/`, `arch/x86/kvm/`) | `virt/kvm/`, `arch/x86/kvm/`, `kvm_mmu_`, `is_page_fault_stale`, `mmu_invalidate_seq`, `gfn_to_pfn_cache`, `slots_lock` | `contexts/kvm.md` |
@@ -54,7 +54,7 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | Perf Tools Subsystem Code Context Guide (Linux v7.3-rc5) | `tools/perf/`, `perf_tool`, `perf_env`, `DECLARE_RC_STRUCT`, `thread__get`, `thread__put`, `maps__get`, `dso__get` | `contexts/perf.md` |
 | Generic Power Domains (`drivers/pmdomain/`, `include/linux/pm_domain.h`) | `drivers/pmdomain/`, `pm_genpd_`, `of_genpd_`, `GENPD_FLAG_NO_STAY_ON`, `genpd_power_off`, `exynos_pd_` | `contexts/pmdomain.md` |
 | RISC-V Subsystem Code Context Guide (Linux v7.3-rc5) | `arch/riscv/`, `riscv_`, `csr_read`, `csr_write`, `sbi_ecall`, `local_flush_tlb_` | `contexts/riscv.md` |
-| Kernel Rust Toolchain, Bindings, and Pin-Init (`rust/`) | `rust/`, `.rs`, `__rust_helper`, `rust_helper_`, `RUST_CONST_HELPER_`, `try_pin_init`, `pin_init`, `build_assert!` | `contexts/rust.md` |
+| Kernel Rust Toolchain, Bindings, and Pin-Init (`rust/`) | `rust/`, `*.rs` files, `__rust_helper`, `rust_helper_`, `RUST_CONST_HELPER_`, `try_pin_init`, `pin_init`, `build_assert!` | `contexts/rust.md` |
 | Scheduler Internals (`kernel/sched/`) | `kernel/sched/`, `double_rq_lock`, `lockdep_assert_rq_held`, `__pick_eevdf`, `update_load_avg`, `sched_cpu_dying`, `dl_server_` | `contexts/scheduler.md` |
 | Linux SCSI Subsystem Code Context Guide (v7.3-rc5) | `drivers/scsi/`, `drivers/ufs/`, `Scsi_Host`, `scsi_cmnd`, `scsi_device`, `scsi_host_template`, `scsi_done`, `ufshcd_` | `contexts/scsi.md` |
 | Kernel Selftests Build, KVM, and Netns Mechanics (`tools/testing/selftests/`) | `tools/testing/selftests/`, `TEST_PROGS`, `TEST_FILES`, `TEST_GEN_PROGS`, `TEST_GEN_FILES`, `kselftest`, `vm_create_with_one_vcpu`, `kvm_arch_has_default_irqchip` | `contexts/selftests.md` |
@@ -93,12 +93,12 @@ Select any relevant subsystem/file code contexts (`contexts/<file>`) or kernel A
 | MMIO Register and Stream Accessor APIs (`include/asm-generic/io.h`) | `writesl`, `readsl`, `writesw`, `readsw`, `writesb`, `readsb`, `__raw_writel`, `__raw_readl` | `apis/io-accessors.md` |
 | Linux v7.3-rc5 Kernel IRQ API Guide | `request_irq`, `request_threaded_irq`, `free_irq`, `devm_request_irq`, `devm_request_threaded_irq`, `enable_irq`, `disable_irq`, `disable_irq_nosync`, `irq_domain_*`, `generic_handle_*` | `apis/irq.md` |
 | Kexec Handover (KHO) API Guide (Linux v7.3-rc5) | `kho_is_enabled`, `is_kho_boot`, `kho_add_subtree`, `kho_remove_subtree`, `kho_retrieve_subtree`, `kho_preserve_folio`, `kho_unpreserve_folio`, `kho_restore_folio`, `kho_*` | `apis/kho.md` |
-| KVM Core Helper APIs (`include/linux/kvm_host.h`) | `gfn_to_hva`, `gfn_to_hva_many`, `gfn_to_hva_memslot`, `gfn_to_hva_memslot_prot`, `kvm_vcpu_memslots`, `kvm_memslots`, `vcpu_load`, `vcpu_put` | `apis/kvm.md` |
+| KVM Core Helper APIs (`include/linux/kvm_host.h`) | `gfn_to_hva`, `gfn_to_hva_many`, `gfn_to_hva_memslot`, `gfn_to_hva_memslot_prot`, `gfn_to_pfn*`, `kvm_vcpu_memslots`, `kvm_memslots`, `vcpu_load`, `vcpu_put` | `apis/kvm.md` |
 | LED Class and Trigger API Guide (Linux v7.3-rc5) | `led_classdev_register`, `led_classdev_register_ext`, `led_classdev_unregister`, `devm_led_classdev_register`, `devm_led_classdev_register_ext`, `led_trigger_register`, `led_trigger_unregister`, `devm_led_trigger_register` | `apis/leds.md` |
 | Kernel Locking, Concurrency, and Memory Ordering APIs | `local_lock`, `local_trylock`, `local_lock_irqsave`, `lockdep_pin_lock`, `lockdep_unpin_lock`, `DEFINE_WAIT_OVERRIDE_MAP`, `cpus_read_lock`, `cpus_read_unlock`, `spin_lock*`, `raw_spin_lock*` | `apis/locking.md` |
-| Multi-Function Device (MFD) API Guide (Linux v7.3-rc5) | `mfd_add_devices`, `devm_mfd_add_devices`, `mfd_remove_devices`, `mfd_cell`, `PLATFORM_DEVID_AUTO` | `apis/mfd.md` |
+| Multi-Function Device (MFD) API Guide (Linux v7.3-rc5) | `mfd_add_devices`, `devm_mfd_add_devices`, `mfd_remove_devices`, `mfd_cell` | `apis/mfd.md` |
 | Memory Allocation, GFP, Slab, and Mempool APIs (Linux v7.3-rc5) | `alloc_pages`, `alloc_pages_node`, `kmalloc`, `kzalloc`, `kmalloc_nolock`, `kfree_nolock`, `vmalloc`, `mempool_alloc`, `__GFP_*`, `kmem_cache_*` | `apis/mm-alloc.md` |
-| Folio, Page Cache, and XArray API Guide (Linux v7.3-rc5) | `page_folio`, `compound_head`, `folio_expected_ref_count`, `folio_ref_count`, `folio_mapcount`, `folio_lock`, `folio_trylock`, `folio_end_read`, `folio_*`, `filemap_*` | `apis/mm-folio.md` |
+| Folio, Page Cache, and XArray API Guide (Linux v7.3-rc5) | `folio_expected_ref_count`, `folio_ref_count`, `folio_mapcount`, `folio_lock`, `folio_trylock`, `folio_end_read`, `folio_*`, `filemap_*` | `apis/mm-folio.md` |
 | Large Folio, THP, and Hugetlb API Guide (Linux v7.3-rc5) | `split_folio`, `split_huge_page`, `split_folio_to_list`, `try_folio_split_to_order`, `min_order_for_split`, `mapping_min_folio_order`, `folio_put_refs`, `folio_test_large`, `split_huge_*` | `apis/mm-largepage.md` |
 | Page Table Accessors, Batching, and Walkers (`include/linux/pgtable.h`, `include/linux/pagewalk.h`) | `set_ptes`, `folio_pte_batch`, `folio_pte_batch_flags`, `FPB_RESPECT_WRITE`, `folio_mk_pmd`, `folio_mk_pud`, `pte_mkspecial`, `pmd_folio`, `pte_*`, `ptep_*` | `apis/mm-pagetable.md` |
 | Writeback, Swap, Memcg, and Folio Migration API (Linux v7.3-rc5) | `folio_start_writeback`, `__folio_start_writeback`, `wbc_to_tag`, `folio_test_swapbacked`, `folio_test_swapcache`, `get_swap_device`, `put_swap_device`, `__swap_entry_to_info`, `PAGECACHE_TAG_*`, `mem_cgroup_*` | `apis/mm-reclaim.md` |

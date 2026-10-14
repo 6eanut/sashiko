@@ -74,7 +74,9 @@
         "__bpf_kfunc",
         "BTF_KFUNCS",
         "check_kfunc_args",
-        "verifier"
+        "verifier",
+        "BTF_ID_FLAGS",
+        "KF_"
       ]
     },
     {
@@ -202,7 +204,7 @@
         "xe_pm_",
         "xe_pcode_",
         "IS_SRIOV_VF",
-        "intel_cx0_"
+        "drm_dp_dpcd_probe"
       ]
     },
     {
@@ -212,7 +214,6 @@
       ],
       "triggers": [
         "Documentation/devicetree/bindings/",
-        "devicetree/org/schemas",
         "#gpio-cells",
         "#clock-cells",
         "#interrupt-cells"
@@ -406,7 +407,6 @@
       ],
       "triggers": [
         "Kconfig",
-        "depends on ",
         "COMPILE_TEST"
       ]
     },
@@ -562,7 +562,10 @@
         "memory_failure",
         "unmap_poisoned_folio",
         "deferred_split_folio",
-        "non_swapcache_batch"
+        "non_swapcache_batch",
+        "mm/filemap.c",
+        "mm/memory.c",
+        "mm/truncate.c"
       ]
     },
     {
@@ -829,11 +832,10 @@
       "file": "rust.md",
       "covered_paths": [
         "rust/",
-        ".rs"
+        "**.rs"
       ],
       "triggers": [
         "rust/",
-        ".rs",
         "__rust_helper",
         "rust_helper_",
         "RUST_CONST_HELPER_",
