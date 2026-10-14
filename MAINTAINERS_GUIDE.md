@@ -17,14 +17,51 @@ To request tracking for a new lore or NNTP mailing list, you can either:
 1.  **Submit a Pull Request:** Add a `["<list-email>"]` section to [`projects/linux/mailing_lists.toml`](projects/linux/mailing_lists.toml). Sashiko automatically derives the Lore NNTP group name by reversing the domain components and appending the list's local part (e.g., `bpf@vger.kernel.org` becomes `org.kernel.vger.bpf`). If the NNTP group name on `nntp.lore.kernel.org` does not follow this convention, set `nntp_group = "..."` explicitly in the section.
 2.  **Send an Email:** Contact the Sashiko development mailing list (`sashiko@lists.linux.dev`) and `Cc: Roman Gushchin <roman.gushchin@linux.dev>` with your request.
 
-## Adding Subsystem-Specific Prompts
+## Adding or Updating Maintainer Notes & Subsystem Prompts
 
-If you'd like to customize the review criteria or focus areas for your subsystem, you can provide subsystem-specific prompts. There are two ways to do this:
+Sashiko organizes Linux kernel review prompts under [`prompts/kernel/`](prompts/kernel/) into three distinct layers:
 
-1.  **Submit a Pull Request to this Repository:** Add your prompt markdown file directly into the [`third_party/prompts/kernel/subsystem/`](third_party/prompts/kernel/subsystem/) directory.
-2.  **Submit a Pull Request to Chris Mason's Repository:** Contribute your prompts upstream to [Chris Mason's repository](https://github.com/masoncl/review-prompts), which is periodically synced into Sashiko.
+1.  **Maintainer Notes ([`prompts/kernel/maintainers/`](prompts/kernel/maintainers/)):** Subjective maintainer policies, design preferences, and review expectations that **cannot** be derived from reading the source code alone (one `.md` file per `MAINTAINERS` entry or group of related entries).
+2.  **Subsystem Code Contexts ([`prompts/kernel/trees/<tree>/contexts/`](prompts/kernel/trees/mainline/contexts/)):** Objective, tree-versioned summaries of subsystem data structures, locking hierarchies, and state machines (periodically regenerated per kernel tree, such as `mainline` or stable LTS releases).
+3.  **Kernel API Guides ([`prompts/kernel/trees/<tree>/apis/`](prompts/kernel/trees/mainline/apis/)):** Objective, tree-versioned rules, return-value conventions, and lifecycle invariants for commonly used kernel APIs.
 
-> **Note:** Please keep your prompts small and focused. Avoid adding trivial facts or generic programming advice, as this only wastes the AI's context window and can degrade review quality.
+### How to Add or Change Maintainer Notes
+
+To add or update maintainer notes for your subsystem:
+
+1.  **Create or edit a Markdown file in [`prompts/kernel/maintainers/`](prompts/kernel/maintainers/):**
+    Add your subsystem's notes in `prompts/kernel/maintainers/<subsystem>.md` (for example, [`networking-drivers.md`](prompts/kernel/maintainers/networking-drivers.md), [`i2c.md`](prompts/kernel/maintainers/i2c.md), or [`bpf.md`](prompts/kernel/maintainers/bpf.md)).
+2.  **Register or update the mapping in [`prompts/kernel/maintainers/index.json`](prompts/kernel/maintainers/index.json):**
+    Each entry in `index.json` maps a maintainer note file to one or more `MAINTAINERS` section titles (`"sections"`) and file path prefixes (`"paths"`):
+    ```json
+    {
+      "file": "i2c.md",
+      "sections": [
+        "I2C SUBSYSTEM",
+        "I2C SUBSYSTEM HOST DRIVERS"
+      ],
+      "paths": [
+        "drivers/i2c/",
+        "include/linux/i2c.h"
+      ]
+    }
+    ```
+    Sashiko automatically injects your maintainer notes whenever a patch touches a matching path or resolves to one of the listed `MAINTAINERS` sections.
+3.  **Submit a Pull Request or Email:**
+    Open a Pull Request against this repository (or contribute upstream to [Chris Mason's review-prompts repository](https://github.com/masoncl/review-prompts), or email your requested notes to `sashiko@lists.linux.dev`).
+
+### What Belongs in Maintainer Notes
+
+*   **Include subjective policy and preferences that cannot be inferred from the code:**
+    *   What direction the subsystem is evolving toward, and which types of changes are welcome or unwelcome (e.g., rejecting standalone whitespace/typo churn, requiring legacy drivers to migrate to a newer framework before adding features).
+    *   Deprecated patterns or helpers that still appear in existing tree code but must not be copied into new patches.
+    *   Subsystem-specific coding style conventions (e.g., reverse-Christmas-tree variable declarations, header ordering, naming conventions).
+    *   Standard uAPI vs driver-private interface policies (e.g., what may or may not be added to `ethtool -S`, sysfs, or debugfs).
+    *   Required commit message details, hardware testing descriptions, or benchmark numbers.
+*   **Do NOT include objective code mechanics:**
+    *   Do not document how internal functions, structs, or locking mechanics work in the code—those belong in tree-versioned subsystem contexts (`prompts/kernel/trees/<tree>/contexts/`) and API guides (`prompts/kernel/trees/<tree>/apis/`).
+*   **Keep notes concise and scoped to new changes:**
+    *   State clearly when a rule applies only to *new or modified code in a patch* so Sashiko does not flag pre-existing legacy patterns in untouched code.
 
 ## How Sashiko Detects the Baseline for Your Patch
 
