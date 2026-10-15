@@ -346,6 +346,7 @@ pub struct ReleaseReview {
     pub patch_id: Option<i64>,
     pub patch_message_id: String,
     pub index: i64,
+    pub has_inline_review: bool,
     pub inline_review: String,
     pub summary: String,
     pub findings: Vec<serde_json::Value>,
@@ -2266,6 +2267,105 @@ impl Database {
         }
     }
 
+    async fn claim_pending_review_id_in_tx(
+        &self,
+        patchset_id: i64,
+        patch_id: Option<i64>,
+    ) -> Result<Option<i64>> {
+        let id_opt = self
+            .query_returning_i64(
+                "UPDATE reviews
+                    SET status = 'In Review', interaction_id = NULL
+                  WHERE id = (
+                      SELECT id FROM reviews
+                       WHERE patchset_id = ?
+                         AND patch_id IS ?
+                         AND status IN ('Pending', 'In Review')
+                       ORDER BY CASE WHEN status = 'Pending' THEN 0 ELSE 1 END, id ASC
+                       LIMIT 1
+                  )
+                  RETURNING id",
+                libsql::params![patchset_id, patch_id],
+            )
+            .await?;
+        if let Some(id) = id_opt {
+            self.clear_aborted_review_artifacts_in_tx(id).await?;
+        }
+        Ok(id_opt)
+    }
+
+    /// Atomically claims a `Pending` or orphaned `In Review` review row for
+    /// `(patchset_id, patch_id)` by transitioning its status to `'In Review'`,
+    /// clearing any partial artifacts from prior aborted attempts, and
+    /// returning its ID.
+    pub async fn claim_pending_review_id(
+        &self,
+        patchset_id: i64,
+        patch_id: Option<i64>,
+    ) -> Result<Option<i64>> {
+        let tx = self.begin_immediate_transaction().await?;
+        let tx_db = self.with_connection((*tx).clone());
+        let id_opt = tx_db
+            .claim_pending_review_id_in_tx(patchset_id, patch_id)
+            .await?;
+        tx.commit().await?;
+        Ok(id_opt)
+    }
+
+    /// Atomically claims an existing `Pending` or orphaned `In Review` review
+    /// row for `(patchset_id, patch_id)` (transitioning it to `'In Review'`,
+    /// refreshing its execution metadata, and clearing any partial artifacts)
+    /// or inserts a new review row directly in `'In Review'` status inside the
+    /// same immediate transaction.
+    pub async fn claim_or_create_in_review(
+        &self,
+        patchset_id: i64,
+        patch_id: Option<i64>,
+        provider: &str,
+        model: &str,
+        baseline_id: Option<i64>,
+        prompts_hash: Option<&str>,
+    ) -> Result<i64> {
+        let tx = self.begin_immediate_transaction().await?;
+        let tx_db = self.with_connection((*tx).clone());
+        let id = if let Some(id) = tx_db
+            .claim_pending_review_id_in_tx(patchset_id, patch_id)
+            .await?
+        {
+            tx_db
+                .execute(
+                    "UPDATE reviews
+                        SET provider = ?, model = ?, baseline_id = ?, prompts_hash = ?
+                      WHERE id = ?",
+                    libsql::params![provider, model, baseline_id, prompts_hash, id],
+                )
+                .await?;
+            id
+        } else {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_secs() as i64;
+            tx_db
+                .query_returning_i64(
+                    "INSERT INTO reviews (patchset_id, patch_id, status, created_at, provider, model, baseline_id, prompts_hash)
+                     VALUES (?, ?, 'In Review', ?, ?, ?, ?, ?) RETURNING id",
+                    libsql::params![
+                        patchset_id,
+                        patch_id,
+                        now,
+                        provider,
+                        model,
+                        baseline_id,
+                        prompts_hash
+                    ],
+                )
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("Failed to get review ID"))?
+        };
+        tx.commit().await?;
+        Ok(id)
+    }
+
     pub async fn create_review(
         &self,
         patchset_id: i64,
@@ -2380,11 +2480,45 @@ impl Database {
         inline_review: Option<&str>,
         logs: Option<&str>,
     ) -> Result<()> {
-        self.execute(
-            "UPDATE reviews SET status = ?, result_description = ?, summary = ?, interaction_id = ?, inline_review = ?, logs = ? WHERE id = ?",
-            libsql::params![status, result, summary, interaction_id, inline_review.map(crate::compression::compress_string_if_needed).unwrap_or(libsql::Value::Null), logs.map(crate::compression::compress_string_if_needed).unwrap_or(libsql::Value::Null), review_id],
-        )
-        .await?;
+        let (inline_val, logs_val) =
+            match (inline_review.map(str::to_owned), logs.map(str::to_owned)) {
+                (None, None) => (libsql::Value::Null, libsql::Value::Null),
+                (inline_opt, logs_opt)
+                    if inline_opt.as_ref().is_some_and(|s| s.len() > 1024)
+                        || logs_opt.as_ref().is_some_and(|s| s.len() > 1024) =>
+                {
+                    tokio::task::spawn_blocking(move || {
+                        (
+                            inline_opt
+                                .as_deref()
+                                .map(crate::compression::compress_string_if_needed)
+                                .unwrap_or(libsql::Value::Null),
+                            logs_opt
+                                .as_deref()
+                                .map(crate::compression::compress_string_if_needed)
+                                .unwrap_or(libsql::Value::Null),
+                        )
+                    })
+                    .await?
+                }
+                (inline_opt, logs_opt) => (
+                    inline_opt
+                        .map(libsql::Value::Text)
+                        .unwrap_or(libsql::Value::Null),
+                    logs_opt
+                        .map(libsql::Value::Text)
+                        .unwrap_or(libsql::Value::Null),
+                ),
+            };
+        let updated = self
+            .execute(
+                "UPDATE reviews SET status = ?, result_description = ?, summary = ?, interaction_id = ?, inline_review = ?, logs = ? WHERE id = ?",
+                libsql::params![status, result, summary, interaction_id, inline_val, logs_val, review_id],
+            )
+            .await?;
+        if updated == 0 {
+            bail!("review {} no longer exists or was superseded", review_id);
+        }
         Ok(())
     }
 
@@ -2453,19 +2587,29 @@ impl Database {
             .locations
             .as_ref()
             .and_then(|v| serde_json::to_string(v).ok());
-        self.execute(
-            "INSERT INTO findings (review_id, severity, severity_explanation, problem, preexisting, locations)
-             VALUES (?, ?, ?, ?, ?, ?)",
-            libsql::params![
-                finding.review_id,
-                finding.severity as i32,
-                finding.severity_explanation,
-                finding.problem,
-                val,
-                locations_val,
-            ],
-        )
-        .await?;
+        let inserted = self
+            .execute(
+                "INSERT INTO findings (review_id, severity, severity_explanation, problem, preexisting, locations)
+                 SELECT ?, ?, ?, ?, ?, ?
+                 FROM reviews
+                 WHERE id = ?",
+                libsql::params![
+                    finding.review_id,
+                    finding.severity as i32,
+                    finding.severity_explanation,
+                    finding.problem,
+                    val,
+                    locations_val,
+                    finding.review_id,
+                ],
+            )
+            .await?;
+        if inserted == 0 {
+            bail!(
+                "review {} no longer exists for finding insertion",
+                finding.review_id
+            );
+        }
         Ok(())
     }
 
@@ -9684,55 +9828,107 @@ impl Database {
         &self,
         patchset_id: i64,
     ) -> Result<Vec<ReleaseReview>> {
-        let mut rows = self
-            .conn
-            .query(
-                "SELECT r.id, r.patch_id, r.inline_review, r.summary,
-                        COALESCE(m.message_id, ps.cover_letter_message_id, ''),
-                        COALESCE(p.part_index, 0)
-             FROM reviews r
-             JOIN patchsets ps ON ps.id = r.patchset_id
-             LEFT JOIN patches p ON r.patch_id = p.id
-             LEFT JOIN messages m ON m.message_id = COALESCE(p.message_id, ps.cover_letter_message_id)
-             WHERE r.patchset_id = ? AND r.status = 'Reviewed'
-             ORDER BY COALESCE(p.part_index, 0) ASC, r.id ASC",
-                libsql::params![patchset_id],
-            )
-            .await?;
+        self.query_completed_reviews_for_release(patchset_id, None)
+            .await
+    }
 
-        let mut temp_reviews = Vec::new();
+    pub async fn get_latest_completed_review_for_patch(
+        &self,
+        patchset_id: i64,
+        patch_id: Option<i64>,
+    ) -> Result<Option<ReleaseReview>> {
+        Ok(self
+            .query_completed_reviews_for_release(patchset_id, Some(patch_id))
+            .await?
+            .pop())
+    }
+
+    async fn query_completed_reviews_for_release(
+        &self,
+        patchset_id: i64,
+        patch_id_filter: Option<Option<i64>>,
+    ) -> Result<Vec<ReleaseReview>> {
+        let mut rows = match patch_id_filter {
+            Some(patch_id) => {
+                self.conn
+                    .query(
+                        "SELECT r.id, r.patch_id, r.inline_review, r.summary,
+                                COALESCE(m.message_id, ps.cover_letter_message_id, ''),
+                                COALESCE(p.part_index, 0)
+                     FROM reviews r
+                     JOIN patchsets ps ON ps.id = r.patchset_id
+                     LEFT JOIN patches p ON r.patch_id = p.id
+                     LEFT JOIN messages m ON m.message_id = COALESCE(p.message_id, ps.cover_letter_message_id)
+                     WHERE r.patchset_id = ? AND r.patch_id IS ? AND r.status = 'Reviewed'
+                     ORDER BY r.id DESC
+                     LIMIT 1",
+                        libsql::params![patchset_id, patch_id],
+                    )
+                    .await?
+            }
+            None => {
+                self.conn
+                    .query(
+                        "SELECT r.id, r.patch_id, r.inline_review, r.summary,
+                                COALESCE(m.message_id, ps.cover_letter_message_id, ''),
+                                COALESCE(p.part_index, 0)
+                     FROM reviews r
+                     JOIN patchsets ps ON ps.id = r.patchset_id
+                     LEFT JOIN patches p ON r.patch_id = p.id
+                     LEFT JOIN messages m ON m.message_id = COALESCE(p.message_id, ps.cover_letter_message_id)
+                     WHERE r.patchset_id = ? AND r.status = 'Reviewed'
+                     ORDER BY COALESCE(p.part_index, 0) ASC, r.id ASC",
+                        libsql::params![patchset_id],
+                    )
+                    .await?
+            }
+        };
+
+        let mut reviews = Vec::new();
         while let Some(row) = rows.next().await? {
             let review_id: i64 = row.get(0)?;
             let patch_id: Option<i64> = row.get(1)?;
-            let inline_review: String = crate::compression::get_compressed_string_opt(&row, 2)
-                .unwrap_or(None)
-                .unwrap_or_default();
-            let summary: String = crate::compression::get_compressed_string_opt(&row, 3)
-                .unwrap_or(None)
-                .unwrap_or_default();
+            let inline_review_opt = crate::compression::get_compressed_string_opt(&row, 2)?;
+            let has_inline_review = inline_review_opt.is_some();
+            let inline_review: String = inline_review_opt.unwrap_or_default();
+            let summary: String =
+                crate::compression::get_compressed_string_opt(&row, 3)?.unwrap_or_default();
             let patch_message_id: String = row.get(4).unwrap_or_default();
             let index: i64 = row.get(5).unwrap_or_default();
-            temp_reviews.push((
-                review_id,
+            reviews.push(ReleaseReview {
+                id: review_id,
                 patch_id,
-                inline_review,
-                summary,
                 patch_message_id,
                 index,
-            ));
+                has_inline_review,
+                inline_review,
+                summary,
+                findings: Vec::new(),
+            });
         }
 
-        let mut reviews = Vec::new();
-        for (review_id, patch_id, inline_review, summary, patch_message_id, index) in temp_reviews {
-            // Fetch findings for this review
-            let mut findings_rows = self.conn.query(
-                "SELECT severity, problem, severity_explanation, preexisting, locations FROM findings WHERE review_id = ?",
-                libsql::params![review_id],
-            ).await?;
+        if reviews.is_empty() {
+            return Ok(reviews);
+        }
 
-            let mut findings = Vec::new();
+        const FINDINGS_CHUNK_SIZE: usize = 200;
+        let mut findings_by_review: std::collections::HashMap<i64, Vec<serde_json::Value>> =
+            std::collections::HashMap::new();
+        for chunk in reviews.chunks(FINDINGS_CHUNK_SIZE) {
+            let placeholders = vec!["?"; chunk.len()].join(", ");
+            let sql = format!(
+                "SELECT review_id, severity, problem, severity_explanation, preexisting, locations
+                   FROM findings
+                  WHERE review_id IN ({})
+                  ORDER BY id ASC",
+                placeholders
+            );
+            let params: Vec<libsql::Value> =
+                chunk.iter().map(|r| libsql::Value::Integer(r.id)).collect();
+            let mut findings_rows = self.conn.query(&sql, params).await?;
             while let Some(f_row) = findings_rows.next().await? {
-                let severity_int: i64 = f_row.get(0).unwrap_or(1);
+                let review_id: i64 = f_row.get(0)?;
+                let severity_int: i64 = f_row.get(1).unwrap_or(1);
                 let severity = match severity_int {
                     4 => "Critical",
                     3 => "High",
@@ -9740,32 +9936,31 @@ impl Database {
                     _ => "Low",
                 }
                 .to_string();
-                let problem: String = f_row.get(1).unwrap_or_default();
-                let severity_explanation: Option<String> = f_row.get(2).ok();
-                let int: Option<i64> = f_row.get(3).ok();
+                let problem: String = f_row.get(2).unwrap_or_default();
+                let severity_explanation: Option<String> = f_row.get(3).ok();
+                let int: Option<i64> = f_row.get(4).ok();
                 let preexisting = int.map(|val| val != 0);
-                let locations_str: Option<String> = f_row.get(4).ok();
+                let locations_str: Option<String> = f_row.get(5).ok();
                 let locations =
                     locations_str.and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok());
 
-                findings.push(json!({
-                    "severity": severity,
-                    "problem": problem,
-                    "severity_explanation": severity_explanation,
-                    "preexisting": preexisting,
-                    "locations": locations,
-                }));
+                findings_by_review
+                    .entry(review_id)
+                    .or_default()
+                    .push(json!({
+                        "severity": severity,
+                        "problem": problem,
+                        "severity_explanation": severity_explanation,
+                        "preexisting": preexisting,
+                        "locations": locations,
+                    }));
             }
+        }
 
-            reviews.push(ReleaseReview {
-                id: review_id,
-                patch_id,
-                patch_message_id,
-                index,
-                inline_review,
-                summary,
-                findings,
-            });
+        for review in &mut reviews {
+            if let Some(findings) = findings_by_review.remove(&review.id) {
+                review.findings = findings;
+            }
         }
         Ok(reviews)
     }
@@ -11007,62 +11202,225 @@ impl Database {
     }
 
     pub async fn rerun_patchset(&self, id: i64) -> Result<()> {
-        // 1. Get current status of the patchset
-        let mut rows = self
-            .conn
-            .query(
-                "SELECT status FROM patchsets WHERE id = ?",
-                libsql::params![id],
-            )
-            .await?;
+        let tx = self.begin_immediate_transaction().await?;
+        let tx_db = self.with_connection((*tx).clone());
 
-        let current_status = if let Some(row) = rows.next().await? {
-            row.get::<Option<String>>(0)?
-        } else {
-            None
+        // 1. Get current status of the patchset under the write lock
+        let current_status = {
+            let mut rows = tx_db
+                .conn
+                .query(
+                    "SELECT status FROM patchsets WHERE id = ?",
+                    libsql::params![id],
+                )
+                .await?;
+            if let Some(row) = rows.next().await? {
+                row.get::<Option<String>>(0)?
+            } else {
+                None
+            }
         };
 
         let should_increment = current_status.as_deref() == Some("Reviewed");
 
-        // 2. Reset patchset status to Pending
-        self.execute(
-            "UPDATE patchsets SET status = 'Pending' WHERE id = ?",
-            libsql::params![id],
-        )
-        .await?;
+        // 2. Reset patchset and non-terminal/failed patch statuses to Pending
+        tx_db
+            .execute(
+                "UPDATE patchsets SET status = 'Pending' WHERE id = ?",
+                libsql::params![id],
+            )
+            .await?;
+        tx_db
+            .execute(
+                "UPDATE patches SET status = 'Pending' WHERE patchset_id = ? AND status IN ('Failed', 'In Review')",
+                libsql::params![id],
+            )
+            .await?;
 
         // 3. Increment target_review_count only if it was previously Reviewed
         if should_increment {
-            self.execute(
+            tx_db
+                .execute(
                     "UPDATE patchsets SET target_review_count = COALESCE(target_review_count, 1) + 1 WHERE id = ?",
                     libsql::params![id],
                 )
                 .await?;
         }
 
-        // 4. Delete associated tool usages and findings for failed reviews that block retrying
-        self.execute(
-                "DELETE FROM tool_usages WHERE review_id IN (
-                    SELECT id FROM reviews WHERE patchset_id = ? AND status IN ('Failed', 'FailedToApply') AND interaction_id IS NULL
-                )",
+        // 4. Delete associated tool usages, findings, bug links, and unsent
+        // outbox entries for infra-failed attempts (interaction_id IS NULL,
+        // which are the only Failed rows matched by has_failed_review()) and
+        // interrupted ('In Review') attempts before deleting those review rows
+        // in step 5. Standalone ai_interactions rows have no foreign key to
+        // reviews and remain in the ledger for cumulative token accounting.
+        let review_filter = "((status IN ('Failed', 'FailedToApply') AND interaction_id IS NULL) OR status = 'In Review')";
+
+        tx_db
+            .execute(
+                &format!(
+                    "DELETE FROM tool_usages WHERE review_id IN (
+                        SELECT id FROM reviews WHERE patchset_id = ? AND {review_filter}
+                    )"
+                ),
                 libsql::params![id],
             )
             .await?;
 
-        self.execute(
-                "DELETE FROM findings WHERE review_id IN (
-                    SELECT id FROM reviews WHERE patchset_id = ? AND status IN ('Failed', 'FailedToApply') AND interaction_id IS NULL
-                )",
+        tx_db
+            .execute(
+                &format!(
+                    "DELETE FROM findings WHERE review_id IN (
+                        SELECT id FROM reviews WHERE patchset_id = ? AND {review_filter}
+                    )"
+                ),
                 libsql::params![id],
             )
             .await?;
 
-        // 5. Delete failed reviews that block retrying (infra failures)
-        self.execute(
-                "DELETE FROM reviews WHERE patchset_id = ? AND status IN ('Failed', 'FailedToApply') AND interaction_id IS NULL",
+        tx_db
+            .execute(
+                &format!(
+                    "DELETE FROM bug_reviews WHERE review_id IN (
+                        SELECT id FROM reviews WHERE patchset_id = ? AND {review_filter}
+                    )"
+                ),
                 libsql::params![id],
             )
             .await?;
+
+        tx_db
+            .execute(
+                &format!(
+                    "DELETE FROM email_outbox
+                      WHERE status IN ('Pending', 'Embargoed')
+                        AND (
+                            (patch_id IN (
+                                SELECT patch_id FROM reviews
+                                 WHERE patchset_id = ? AND patch_id IS NOT NULL AND {review_filter}
+                            ) AND NOT EXISTS (
+                                SELECT 1 FROM reviews r_ok
+                                 WHERE r_ok.patchset_id = ? AND r_ok.patch_id = email_outbox.patch_id AND r_ok.status = 'Reviewed'
+                            ))
+                            OR (patch_id IS NULL AND patchset_id = ? AND EXISTS (
+                                SELECT 1 FROM reviews
+                                 WHERE patchset_id = ? AND patch_id IS NULL AND {review_filter}
+                            ) AND NOT EXISTS (
+                                SELECT 1 FROM reviews r_ok
+                                 WHERE r_ok.patchset_id = ? AND r_ok.patch_id IS NULL AND r_ok.status = 'Reviewed'
+                            ))
+                        )"
+                ),
+                libsql::params![id, id, id, id, id],
+            )
+            .await?;
+
+        tx_db
+            .execute(
+                &format!(
+                    "DELETE FROM patchwork_outbox
+                      WHERE status = 'Pending'
+                        AND patch_msg_id IN (
+                            SELECT p.message_id FROM patches p
+                            WHERE p.id IN (
+                                SELECT patch_id FROM reviews
+                                 WHERE patchset_id = ? AND patch_id IS NOT NULL AND {review_filter}
+                            )
+                            AND NOT EXISTS (
+                                SELECT 1 FROM reviews r_ok
+                                 WHERE r_ok.patch_id = p.id AND r_ok.status = 'Reviewed'
+                            )
+                        )"
+                ),
+                libsql::params![id],
+            )
+            .await?;
+
+        // 5. Delete failed or interrupted ('In Review') review rows so the next
+        // attempt allocates a fresh review_id instead of sharing a row with an
+        // in-flight worker that may still hold the old review_id.
+        tx_db
+            .execute(
+                &format!("DELETE FROM reviews WHERE patchset_id = ? AND {review_filter}"),
+                libsql::params![id],
+            )
+            .await?;
+
+        tx.commit().await?;
+        Ok(())
+    }
+
+    /// Clears any partial tool usages, findings, bug links, unsent outbox rows,
+    /// and interaction reference attached to a review row inside an immediate
+    /// transaction before an in-process retry or claimed Pending row reuses it.
+    pub async fn clear_aborted_review_artifacts(&self, review_id: i64) -> Result<()> {
+        let tx = self.begin_immediate_transaction().await?;
+        let tx_db = self.with_connection((*tx).clone());
+        tx_db
+            .clear_aborted_review_artifacts_in_tx(review_id)
+            .await?;
+        tx.commit().await?;
+        Ok(())
+    }
+
+    async fn clear_aborted_review_artifacts_in_tx(&self, review_id: i64) -> Result<()> {
+        self.execute(
+            "DELETE FROM tool_usages WHERE review_id = ?",
+            libsql::params![review_id],
+        )
+        .await?;
+        self.execute(
+            "DELETE FROM findings WHERE review_id = ?",
+            libsql::params![review_id],
+        )
+        .await?;
+        self.execute(
+            "DELETE FROM bug_reviews WHERE review_id = ?",
+            libsql::params![review_id],
+        )
+        .await?;
+        self.execute(
+            "DELETE FROM email_outbox
+              WHERE status IN ('Pending', 'Embargoed')
+                AND (
+                    (patch_id IN (SELECT patch_id FROM reviews WHERE id = ? AND patch_id IS NOT NULL)
+                     AND NOT EXISTS (
+                         SELECT 1 FROM reviews r_ok
+                          WHERE r_ok.patch_id = email_outbox.patch_id AND r_ok.status = 'Reviewed'
+                     ))
+                    OR (patch_id IS NULL
+                        AND patchset_id IN (SELECT patchset_id FROM reviews WHERE id = ? AND patch_id IS NULL)
+                        AND NOT EXISTS (
+                            SELECT 1 FROM reviews r_ok
+                             WHERE r_ok.patchset_id = email_outbox.patchset_id AND r_ok.patch_id IS NULL AND r_ok.status = 'Reviewed'
+                        ))
+                )",
+            libsql::params![review_id, review_id],
+        )
+        .await?;
+        self.execute(
+            "DELETE FROM patchwork_outbox
+              WHERE status = 'Pending'
+                AND patch_msg_id IN (
+                    SELECT p.message_id FROM patches p
+                    JOIN reviews r ON r.patch_id = p.id
+                    WHERE r.id = ?
+                      AND NOT EXISTS (
+                          SELECT 1 FROM reviews r_ok
+                           WHERE r_ok.patch_id = p.id AND r_ok.status = 'Reviewed'
+                      )
+                )",
+            libsql::params![review_id],
+        )
+        .await?;
+        let updated = self
+            .execute(
+                "UPDATE reviews SET status = 'In Review', interaction_id = NULL WHERE id = ?",
+                libsql::params![review_id],
+            )
+            .await?;
+        if updated == 0 {
+            bail!("review {} no longer exists or was superseded", review_id);
+        }
 
         Ok(())
     }
@@ -11395,24 +11753,54 @@ impl Database {
         references_hdr: &str,
         body: &str,
     ) -> Result<()> {
-        // Prevent duplicate emails for the same patch
+        // Prevent duplicate emails for the same patch; if an unsent row from an
+        // aborted attempt exists, refresh its payload with the latest review.
         let tx = self.begin_immediate_transaction().await?;
-        let mut rows = tx
-            .query(
-                "SELECT 1 FROM email_outbox WHERE patch_id = ?",
-                libsql::params![patch_id],
-            )
-            .await?;
+        let existing = {
+            let mut rows = tx
+                .query(
+                    "SELECT id, status FROM email_outbox WHERE patch_id = ? ORDER BY id DESC LIMIT 1",
+                    libsql::params![patch_id],
+                )
+                .await?;
+            if let Some(row) = rows.next().await? {
+                let id: i64 = row.get(0)?;
+                let existing_status: String = row.get::<Option<String>>(1)?.unwrap_or_default();
+                Some((id, existing_status))
+            } else {
+                None
+            }
+        };
 
-        if rows.next().await?.is_some() {
-            drop(rows);
+        if let Some((existing_id, existing_status)) = existing {
+            if existing_status == "Pending" || existing_status == "Embargoed" {
+                tx.execute(
+                    "UPDATE email_outbox
+                        SET status = ?, to_addresses = ?, cc_addresses = ?,
+                            subject = ?, in_reply_to = ?, references_hdr = ?, body = ?
+                      WHERE id = ?",
+                    libsql::params![
+                        status,
+                        to_addresses,
+                        cc_addresses,
+                        subject,
+                        in_reply_to,
+                        references_hdr,
+                        body,
+                        existing_id,
+                    ],
+                )
+                .await?;
+                tx.commit().await?;
+                return Ok(());
+            }
             tracing::info!(
-                "Email outbox entry already exists for patch_id {}, skipping to prevent duplicates.",
-                patch_id
+                "Email outbox entry already exists for patch_id {} (status {}), skipping to prevent duplicates.",
+                patch_id,
+                existing_status
             );
             return Ok(());
         }
-        drop(rows);
 
         let created_at = chrono::Utc::now().timestamp();
         tx.execute(
@@ -11449,23 +11837,54 @@ impl Database {
         body: &str,
     ) -> Result<()> {
         let tx = self.begin_immediate_transaction().await?;
-        let mut rows = tx
-            .query(
-                "SELECT 1 FROM email_outbox
-                 WHERE patchset_id = ? AND patch_id IS NULL AND kind = ?",
-                libsql::params![patchset_id, EmailKind::ReviewReply.as_str()],
-            )
-            .await?;
+        let existing = {
+            let mut rows = tx
+                .query(
+                    "SELECT id, status FROM email_outbox
+                     WHERE patchset_id = ? AND patch_id IS NULL AND kind = ?
+                     ORDER BY id DESC LIMIT 1",
+                    libsql::params![patchset_id, EmailKind::ReviewReply.as_str()],
+                )
+                .await?;
+            if let Some(row) = rows.next().await? {
+                let id: i64 = row.get(0)?;
+                let existing_status: String = row.get::<Option<String>>(1)?.unwrap_or_default();
+                Some((id, existing_status))
+            } else {
+                None
+            }
+        };
 
-        if rows.next().await?.is_some() {
-            drop(rows);
+        if let Some((existing_id, existing_status)) = existing {
+            if existing_status == "Pending" || existing_status == "Embargoed" {
+                tx.execute(
+                    "UPDATE email_outbox
+                        SET review_id = ?, status = ?, to_addresses = ?, cc_addresses = ?,
+                            subject = ?, in_reply_to = ?, references_hdr = ?, body = ?
+                      WHERE id = ?",
+                    libsql::params![
+                        review_id,
+                        status,
+                        to_addresses,
+                        cc_addresses,
+                        subject,
+                        in_reply_to,
+                        references_hdr,
+                        body,
+                        existing_id,
+                    ],
+                )
+                .await?;
+                tx.commit().await?;
+                return Ok(());
+            }
             tracing::info!(
-                "Cover letter email outbox entry already exists for patchset_id {}, skipping to prevent duplicates.",
-                patchset_id
+                "Cover letter email outbox entry already exists for patchset_id {} (status {}), skipping to prevent duplicates.",
+                patchset_id,
+                existing_status
             );
             return Ok(());
         }
-        drop(rows);
 
         let created_at = chrono::Utc::now().timestamp();
         tx.execute(
@@ -26233,5 +26652,327 @@ mod tests {
              Offenders: {}",
             offenders.join(", ")
         );
+    }
+
+    #[tokio::test]
+    async fn test_rerun_patchset_cleans_in_review_artifacts_and_resets_to_pending() -> Result<()> {
+        let db = setup_db().await;
+        let tid = db
+            .create_thread("in_review_cleanup@kernel.org", "[PATCH] test", 1000)
+            .await?;
+        db.create_message(
+            "in_review_cleanup@kernel.org",
+            tid,
+            None,
+            "Author <a@b.c>",
+            "[PATCH] test",
+            1000,
+            "body",
+            "to@b.c",
+            "",
+            None,
+            None,
+        )
+        .await?;
+        let ps_id = db
+            .create_patchset(
+                tid,
+                None,
+                "in_review_cleanup@kernel.org",
+                "[PATCH] test",
+                "Author <a@b.c>",
+                1000,
+                1,
+                1,
+                "to@b.c",
+                "",
+                None,
+                1,
+                None,
+                false,
+                None,
+                None,
+            )
+            .await?
+            .unwrap();
+        let patch_id = db
+            .create_patch(ps_id, "in_review_cleanup@kernel.org", 1, "diff")
+            .await?;
+        let review_id = db
+            .create_review(ps_id, Some(patch_id), "gemini", "pro", None, None)
+            .await?;
+        db.create_ai_interaction(AiInteractionParams {
+            id: "inter-aborted-1",
+            parent_id: None,
+            workflow_id: None,
+            provider: "gemini",
+            model: "pro",
+            input: "in",
+            output: "out",
+            tokens_in: 10,
+            tokens_out: 20,
+            tokens_cached: 0,
+        })
+        .await?;
+        db.update_review_status(review_id, "In Review", Some("inter-aborted-1"))
+            .await?;
+        db.create_finding(Finding {
+            review_id,
+            severity: Severity::High,
+            severity_explanation: Some("partial finding before DB completion error".to_string()),
+            problem: "partial finding".to_string(),
+            preexisting: Some(false),
+            locations: None,
+        })
+        .await?;
+        db.create_tool_usage(ToolUsage {
+            review_id,
+            provider: "gemini".to_string(),
+            model: "pro".to_string(),
+            tool_name: "git_diff".to_string(),
+            arguments: Some("{}".to_string()),
+            output_length: 12,
+        })
+        .await?;
+        let bug_id = db
+            .create_bug(&NewBug {
+                bugid: "linux-aborted-rerun-1".to_string(),
+                title: "Partial bug candidate".to_string(),
+                lifecycle_status: BugLifecycleStatus::New,
+                pipeline_state: BugPipelineState::Pending,
+                assignee: None,
+                reporter: "sashiko".to_string(),
+                reported_at: 1000,
+                discovered_in_patchset_id: Some(ps_id),
+                discovered_in_patch_id: Some(patch_id),
+                discovered_in_commit: None,
+                source_ref: None,
+                vector_json: None,
+                duplicate_of_id: None,
+                subsystems: vec![],
+            })
+            .await?;
+        db.link_review_to_bug(review_id, bug_id, true).await?;
+        db.insert_email_outbox(
+            patch_id,
+            "Pending",
+            "to@b.c",
+            "",
+            "Re: [PATCH] test",
+            "<in_review_cleanup@kernel.org>",
+            "<in_review_cleanup@kernel.org>",
+            "stale outbox body",
+        )
+        .await?;
+        db.insert_patchwork_outbox(
+            "in_review_cleanup@kernel.org",
+            "https://patchwork.kernel.org/api/1.2",
+            "warning",
+            "stale patchwork check",
+            "https://sashiko.dev/#/patchset/in_review_cleanup@kernel.org",
+            "sashiko",
+        )
+        .await?;
+
+        db.rerun_patchset(ps_id).await?;
+
+        let reused_id = db.get_pending_review_id(ps_id, Some(patch_id)).await?;
+        assert_eq!(reused_id, None);
+
+        let mut eo_rows = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM email_outbox WHERE patch_id = ?",
+                libsql::params![patch_id],
+            )
+            .await?;
+        let eo_count: i64 = eo_rows.next().await?.unwrap().get(0)?;
+        assert_eq!(eo_count, 0);
+
+        let mut pw_rows = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM patchwork_outbox WHERE patch_msg_id = ?",
+                libsql::params!["in_review_cleanup@kernel.org"],
+            )
+            .await?;
+        let pw_count: i64 = pw_rows.next().await?.unwrap().get(0)?;
+        assert_eq!(pw_count, 0);
+
+        let mut br_rows = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM bug_reviews WHERE review_id = ?",
+                libsql::params![review_id],
+            )
+            .await?;
+        let br_count: i64 = br_rows.next().await?.unwrap().get(0)?;
+        assert_eq!(br_count, 0);
+
+        let mut f_rows = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM findings WHERE review_id = ?",
+                libsql::params![review_id],
+            )
+            .await?;
+        let f_count: i64 = f_rows.next().await?.unwrap().get(0)?;
+        assert_eq!(
+            f_count, 0,
+            "rerun_patchset must delete partial findings from In Review rows"
+        );
+
+        let mut t_rows = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM tool_usages WHERE review_id = ?",
+                libsql::params![review_id],
+            )
+            .await?;
+        let t_count: i64 = t_rows.next().await?.unwrap().get(0)?;
+        assert_eq!(t_count, 0);
+
+        let mut rev_rows = db
+            .conn
+            .query(
+                "SELECT 1 FROM reviews WHERE id = ?",
+                libsql::params![review_id],
+            )
+            .await?;
+        assert!(rev_rows.next().await?.is_none());
+
+        assert!(
+            db.complete_review(
+                review_id,
+                "Reviewed",
+                "late completion from old worker",
+                None,
+                None,
+                None,
+                None,
+            )
+            .await
+            .is_err()
+        );
+        assert!(db.clear_aborted_review_artifacts(review_id).await.is_err());
+
+        // Also verify clear_aborted_review_artifacts on a claimed Pending row
+        let retry_rev_id = db
+            .create_review(ps_id, Some(patch_id), "gemini", "pro", None, None)
+            .await?;
+        db.create_finding(Finding {
+            review_id: retry_rev_id,
+            severity: Severity::Medium,
+            severity_explanation: Some("aborted finding".to_string()),
+            problem: "aborted".to_string(),
+            preexisting: Some(false),
+            locations: None,
+        })
+        .await?;
+        db.create_tool_usage(ToolUsage {
+            review_id: retry_rev_id,
+            provider: "gemini".to_string(),
+            model: "pro".to_string(),
+            tool_name: "git_diff".to_string(),
+            arguments: Some("{}".to_string()),
+            output_length: 8,
+        })
+        .await?;
+        db.link_review_to_bug(retry_rev_id, bug_id, true).await?;
+        db.insert_email_outbox(
+            patch_id,
+            "Pending",
+            "to@b.c",
+            "",
+            "Re: [PATCH] test",
+            "<in_review_cleanup@kernel.org>",
+            "<in_review_cleanup@kernel.org>",
+            "aborted body",
+        )
+        .await?;
+        db.insert_patchwork_outbox(
+            "in_review_cleanup@kernel.org",
+            "https://patchwork.kernel.org/api/1.2",
+            "warning",
+            "aborted patchwork check",
+            "https://sashiko.dev/#/patchset/in_review_cleanup@kernel.org",
+            "sashiko",
+        )
+        .await?;
+
+        let claimed = db.claim_pending_review_id(ps_id, Some(patch_id)).await?;
+        assert_eq!(claimed, Some(retry_rev_id));
+
+        for table in ["findings", "tool_usages", "bug_reviews"] {
+            let mut rows = db
+                .conn
+                .query(
+                    &format!("SELECT COUNT(*) FROM {table} WHERE review_id = ?"),
+                    libsql::params![retry_rev_id],
+                )
+                .await?;
+            let count: i64 = rows.next().await?.unwrap().get(0)?;
+            assert_eq!(count, 0, "expected {table} to be cleared");
+        }
+        let mut eo2 = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM email_outbox WHERE patch_id = ?",
+                libsql::params![patch_id],
+            )
+            .await?;
+        assert_eq!(eo2.next().await?.unwrap().get::<i64>(0)?, 0);
+        let mut pw2 = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM patchwork_outbox WHERE patch_msg_id = ?",
+                libsql::params!["in_review_cleanup@kernel.org"],
+            )
+            .await?;
+        assert_eq!(pw2.next().await?.unwrap().get::<i64>(0)?, 0);
+
+        // If a worker crashes while retry_rev_id is in 'In Review' status,
+        // claim_or_create_in_review reclaims the orphaned 'In Review' row and
+        // clears its partial artifacts instead of inserting a duplicate row.
+        db.create_finding(Finding {
+            review_id: retry_rev_id,
+            severity: Severity::Low,
+            severity_explanation: Some("orphaned finding".to_string()),
+            problem: "orphaned".to_string(),
+            preexisting: Some(false),
+            locations: None,
+        })
+        .await?;
+        let reclaimed_id = db
+            .claim_or_create_in_review(ps_id, Some(patch_id), "gemini", "pro", None, None)
+            .await?;
+        assert_eq!(reclaimed_id, retry_rev_id);
+        let mut orphaned_f_rows = db
+            .conn
+            .query(
+                "SELECT COUNT(*) FROM findings WHERE review_id = ?",
+                libsql::params![retry_rev_id],
+            )
+            .await?;
+        assert_eq!(orphaned_f_rows.next().await?.unwrap().get::<i64>(0)?, 0);
+
+        // Once the active review reaches a terminal status, a subsequent
+        // claim_or_create_in_review inserts a fresh row directly in 'In Review'.
+        db.complete_review(
+            retry_rev_id,
+            "Reviewed",
+            "completed",
+            None,
+            None,
+            None,
+            None,
+        )
+        .await?;
+        let fresh_id = db
+            .claim_or_create_in_review(ps_id, Some(patch_id), "gemini", "pro", None, None)
+            .await?;
+        assert_ne!(fresh_id, retry_rev_id);
+
+        Ok(())
     }
 }
