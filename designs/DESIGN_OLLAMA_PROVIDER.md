@@ -45,7 +45,7 @@ pub struct OllamaClient {
 | `OllamaToolCall` | `function: OllamaToolCallFunction` |
 | `OllamaToolCallFunction` | `name`, `arguments` (JSON object) |
 | `OllamaOptions` | `temperature?`, `num_ctx?`, `num_predict?`, `think?` |
-| `OllamaResponse` | `message`, metrics (`total_duration`, `eval_count`, etc.) |
+| `OllamaResponse` | `message`, optional `done_reason`, metrics (`total_duration`, `eval_count`, etc.) |
 
 #### Error Enum
 
@@ -82,6 +82,7 @@ pub enum OllamaError {
 #### Response Translation: `OllamaResponse` -> `AiResponse`
 - Extracts text content and optional `tool_calls`.
 - Maps metrics (if available) to token usage.
+- A response with `done_reason: "length"` sets `AiResponse.truncated` and emits a warning with the review log prefix, allowing the shared session to reject cut-off output. Normal stops, omitted/null reasons, and unknown reasons retain non-truncated behavior; content, tool calls, and usage are preserved.
 
 ### `src/settings.rs`
 
@@ -107,6 +108,7 @@ pub struct OllamaSettings {
 - A local HTTP fixture captures a schema request sent through `generate_content`, including its top-level `format`, and returns a normal text response (`server` feature).
 
 ### Response Translation Tests
+- `src/ai/ollama/response_tests.rs` covers length, normal stop, missing/null, and unknown finish reasons. A local HTTP fixture verifies truncation through `generate_content` even when the returned content is valid JSON.
 - `test_translate_ollama_response_text`
 - `test_translate_ollama_response_with_tool_calls`
 

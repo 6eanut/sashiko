@@ -77,6 +77,8 @@ pub struct OllamaOptions {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OllamaResponse {
     pub message: OllamaMessage,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub done_reason: Option<String>,
     pub total_duration: u64,
     pub load_duration: u64,
     pub prompt_eval_count: u32,
@@ -315,6 +317,13 @@ fn translate_ollama_request(
 
 /// Translate an Ollama response to internal AiResponse format.
 fn translate_ollama_response(resp: OllamaResponse) -> Result<AiResponse> {
+    let truncated = resp.done_reason.as_deref() == Some("length");
+    if truncated {
+        tracing::warn!(
+            "{}Ollama response truncated due to done_reason = length.",
+            crate::ai::get_log_prefix()
+        );
+    }
     let content = resp.message.content;
 
     let tool_calls = resp.message.tool_calls.map(|tc| {
@@ -341,7 +350,7 @@ fn translate_ollama_response(resp: OllamaResponse) -> Result<AiResponse> {
         thought_signature: None,
         tool_calls,
         usage,
-        truncated: false,
+        truncated,
     })
 }
 
@@ -394,6 +403,10 @@ impl AiProvider for OllamaClient {
 #[cfg(test)]
 #[path = "ollama/format_tests.rs"]
 mod format_tests;
+
+#[cfg(test)]
+#[path = "ollama/response_tests.rs"]
+mod response_tests;
 
 #[cfg(test)]
 mod tests {
@@ -512,6 +525,7 @@ mod tests {
                 content: Some("Hello from Ollama!".to_string()),
                 tool_calls: None,
             },
+            done_reason: None,
             total_duration: 1_000_000_000,
             load_duration: 100_000_000,
             prompt_eval_count: 10,
@@ -547,6 +561,7 @@ mod tests {
                     },
                 }]),
             },
+            done_reason: None,
             total_duration: 800_000_000,
             load_duration: 50_000_000,
             prompt_eval_count: 15,
